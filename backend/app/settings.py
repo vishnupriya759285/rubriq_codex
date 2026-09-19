@@ -1,0 +1,118 @@
+"""Centralized runtime configuration for Rubriq."""
+
+from __future__ import annotations
+
+from functools import lru_cache
+from pathlib import Path
+from typing import Literal
+
+from pydantic import Field, SecretStr, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=ROOT / ".env", env_file_encoding="utf-8", extra="ignore")
+
+    app_env: Literal["development", "test", "production"] = "development"
+    app_name: str = "Rubriq"
+    app_url: str = "http://localhost:3000"
+    api_url: str = "http://localhost:8000"
+    cors_origins: str = "http://localhost:3000"
+    log_level: str = "INFO"
+
+    session_secret: SecretStr = SecretStr("development-only-secret")
+    session_cookie_secure: bool = False
+    session_ttl_seconds: int = Field(default=604800, ge=3600, le=2592000)
+    demo_mode: bool = False
+    demo_teacher_name: str | None = None
+    demo_teacher_email: str | None = None
+    demo_teacher_password: SecretStr | None = None
+    demo_student_name: str | None = None
+    demo_student_email: str | None = None
+    demo_student_password: SecretStr | None = None
+    enable_http_bootstrap: bool = False
+    bootstrap_token: SecretStr | None = None
+
+    database_url: str = "sqlite:///./data/rubriq.db"
+    upload_root: Path = ROOT / "data" / "uploads"
+
+    openai_api_key: SecretStr | None = None
+    openai_model: str = "gpt-5.6-luna"
+    luna_model: str = "gpt-5.6-luna"
+    gpt4o_model: str = "gpt-4o"
+    gpt4o_mini_model: str = "gpt-4o-mini"
+    openai_timeout_seconds: int = Field(default=90, ge=10, le=300)
+    openai_max_retries: int = Field(default=2, ge=0, le=5)
+    ai_concurrency: int = Field(default=3, ge=1, le=4)
+    ai_review_threshold: float = Field(default=0.75, ge=0, le=1)
+
+    s3_endpoint_url: str | None = None
+    s3_region: str = "auto"
+    s3_bucket: str = "rubriq-private"
+    s3_access_key_id: SecretStr | None = None
+    s3_secret_access_key: SecretStr | None = None
+    s3_force_path_style: bool = True
+    s3_signed_url_ttl_seconds: int = Field(default=300, ge=30, le=3600)
+
+    max_upload_mb: int = Field(default=20, ge=1, le=100)
+    max_submission_pages: int = Field(default=10, ge=1, le=20)
+    max_image_dimension: int = Field(default=2400, ge=800, le=5000)
+    processed_image_quality: int = Field(default=88, ge=50, le=100)
+
+    job_poll_interval_seconds: int = Field(default=2, ge=1, le=60)
+    job_max_attempts: int = Field(default=3, ge=1, le=10)
+    job_stale_after_seconds: int = Field(default=600, ge=60, le=3600)
+    rate_limit_per_minute: int = Field(default=120, ge=10, le=1000)
+    login_rate_limit_per_minute: int = Field(default=10, ge=3, le=100)
+    google_drive_client_id: str | None = None
+
+    @field_validator("cors_origins")
+    @classmethod
+    def validate_origins(cls, value: str) -> str:
+        if not all(origin.startswith(("http://", "https://")) for origin in value.split(",") if origin):
+            raise ValueError("CORS_ORIGINS must contain comma-separated HTTP(S) origins")
+        return value
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def openai_enabled(self) -> bool:
+        return self.openai_api_key is not None and bool(self.openai_api_key.get_secret_value())
+
+    @property
+    def google_drive_enabled(self) -> bool:
+        return bool(self.google_drive_client_id)
+
+    @property
+    def is_production(self) -> bool:
+        """Treat an HTTPS PostgreSQL deployment as production even if APP_ENV is stale."""
+        return self.app_env == "production" or (self.app_env == "development" and self.app_url.startswith("https://") and self.database_url.startswith("postgresql+"))
+
+    def validate_production(self) -> None:
+        if not self.is_production:
+            return
+        if self.session_secret.get_secret_value() == "development-only-secret":
+            raise ValueError("SESSION_SECRET must be set in production")
+        if self.session_secret.get_secret_value() in {"replace-with-a-long-random-value", "change-me"} or len(self.session_secret.get_secret_value()) < 32:
+            raise ValueError("SESSION_SECRET must be a strong random value in production")
+        if not self.session_cookie_secure:
+            raise ValueError("SESSION_COOKIE_SECURE must be true in production")
+        if not self.database_url.startswith("postgresql+"):
+            raise ValueError("DATABASE_URL must use PostgreSQL in production")
+        if self.demo_mode:
+            raise ValueError("DEMO_MODE must be false in production")
+        if any(not origin.startswith("https://") or "localhost" in origin for origin in self.cors_origin_list):
+            raise ValueError("CORS_ORIGINS must contain only HTTPS production origins")
+        if self.enable_http_bootstrap and (not self.bootstrap_token or len(self.bootstrap_token.get_secret_value()) < 32):
+            raise ValueError("BOOTSTRAP_TOKEN must be set when HTTP bootstrap is enabled")
+
+
+@lru_cache
+def get_settings() -> Settings:
+    settings = Settings()
+    settings.validate_production()
+    return settings
