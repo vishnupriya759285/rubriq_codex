@@ -1,0 +1,39 @@
+# Environment files - strictly ignored as requested
+.env
+.env*
+*.env
+*.env.*
+.env.example
+.env.local
+.env.*.local
+*.env.example
+
+# Dependencies & Build artifacts
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+backend/.venv/
+.venv/
+venv/
+node_modules/
+
+# Database files & local artifacts
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs & Playwright
+*.log
+.playwright-mcp/
+.DS_Store
+Thumbs.db
