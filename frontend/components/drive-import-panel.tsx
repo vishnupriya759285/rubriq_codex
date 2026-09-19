@@ -1,0 +1,264 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { api } from "@/lib/api";
+
+type RosterStudent = { id: string; name: string; identifier: string; class_name?: string };
+type DriveItem = {
+  folder_id: string;
+  folder_name: string;
+  student_id: string | null;
+  pages: { file_id: string; name: string; mime_type: string }[];
+  status: string;
+  error: string | null;
+};
+
+declare global {
+  interface Window {
+    gapi?: any;
+    google?: any;
+  }
+}
+
+const clientId = process.env.NEXT_PUBLIC_GOOGLE_DRIVE_CLIENT_ID;
+const apiKey = process.env.NEXT_PUBLIC_GOOGLE_DRIVE_API_KEY;
+const appId = process.env.NEXT_PUBLIC_GOOGLE_DRIVE_APP_ID;
+const driveScope = process.env.NEXT_PUBLIC_GOOGLE_DRIVE_SCOPE ?? "https://www.googleapis.com/auth/drive.readonly";
+const NEW_STUDENT = "__new_student__";
+const SKIP_STUDENT = "__skip_student__";
+
+function loadScript(src: string) {
+  return new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${src}"]`);
+    if (existing) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Google Drive could not be loaded."));
+    document.head.appendChild(script);
+  });
+}
+
+function loadPickerApi() {
+  return new Promise<void>((resolve, reject) => {
+    if (!window.gapi?.load) {
+      reject(new Error("Google Picker is unavailable. Refresh the page and try again."));
+      return;
+    }
+    let settled = false;
+    const timeout = window.setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        reject(new Error("Google Picker took too long to load."));
+      }
+    }, 10000);
+    window.gapi.load("picker", () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      resolve();
+    });
+  });
+}
+
+export function DriveImportPanel({ examId, roster }: { examId: string; roster: RosterStudent[] }) {
+  const [open, setOpen] = useState(false);
+  const [allStudents, setAllStudents] = useState<RosterStudent[]>([]);
+  const [token, setToken] = useState("");
+  const [batchId, setBatchId] = useState("");
+  const [items, setItems] = useState<DriveItem[]>([]);
+  const [assignments, setAssignments] = useState<Record<string, string>>({});
+  const [newStudentNames, setNewStudentNames] = useState<Record<string, string>>({});
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+  const pickerRef = useRef<any>(null);
+  const pickerTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!open || !clientId) return;
+    void loadScript("https://accounts.google.com/gsi/client").catch((reason) => setError(reason instanceof Error ? reason.message : "Google Drive could not be loaded."));
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    void api.get<RosterStudent[]>("/api/students?limit=0")
+      .then(setAllStudents)
+      .catch(() => setError("Existing students could not be loaded. You can still create a new student."));
+  }, [open]);
+
+  async function chooseFolder(mode: "main" | "student") {
+    setError("");
+    setStatus("Opening Google Drive...");
+    if (!clientId || !apiKey || !appId) {
+      setError("Google Drive Picker is not fully configured. Add the client ID, API key, and project number to the frontend deployment.");
+      setStatus("");
+      return;
+    }
+    try {
+      await Promise.all([
+        loadScript("https://apis.google.com/js/api.js"),
+        loadScript("https://accounts.google.com/gsi/client"),
+      ]);
+      await loadPickerApi();
+      const accessToken = await new Promise<string>((resolve, reject) => {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: driveScope,
+          callback: (response: any) => response.error ? reject(new Error("Google Drive authorization was not granted.")) : resolve(response.access_token),
+        });
+        tokenClient.requestAccessToken({ prompt: "consent" });
+      });
+      setToken(accessToken);
+      const view = new window.google.picker.DocsView()
+        .setIncludeFolders(true)
+        .setSelectFolderEnabled(true);
+      let pickerLoaded = false;
+      const picker = new window.google.picker.PickerBuilder()
+        .setDeveloperKey(apiKey)
+        .setAppId(appId)
+        .setOAuthToken(accessToken)
+        .setOrigin(window.location.origin)
+        .setTitle(mode === "student" ? "Choose a student folder" : "Choose the student papers folder")
+        .addView(view)
+        .setCallback((data: any) => {
+          const action = data.action ?? data[window.google.picker.Response.ACTION];
+          if (action === window.google.picker.Action.LOADED) {
+            pickerLoaded = true;
+            if (pickerTimeoutRef.current !== null) window.clearTimeout(pickerTimeoutRef.current);
+          } else if (action === window.google.picker.Action.PICKED) {
+            const folder = data.docs?.[0];
+            const folderId = folder?.id ?? folder?.[window.google.picker.Document.ID];
+            picker.setVisible(false);
+            pickerRef.current = null;
+            if (pickerTimeoutRef.current !== null) window.clearTimeout(pickerTimeoutRef.current);
+            if (folderId) void preview(folderId, accessToken, mode);
+          } else if (action === window.google.picker.Action.CANCEL || action === window.google.picker.Action.ERROR) {
+            picker.setVisible(false);
+            pickerRef.current = null;
+            if (pickerTimeoutRef.current !== null) window.clearTimeout(pickerTimeoutRef.current);
+            setStatus("");
+            if (action === window.google.picker.Action.ERROR) setError("Google Drive could not open the folder picker. Check that the browser API key is valid, belongs to the same Google Cloud project, and has the Picker API enabled.");
+          }
+        })
+        .build();
+      pickerRef.current = picker;
+      picker.setVisible(true);
+      pickerTimeoutRef.current = window.setTimeout(() => {
+        if (!pickerLoaded && pickerRef.current === picker) {
+          picker.setVisible(false);
+          pickerRef.current = null;
+          setStatus("");
+          setError("Google Drive Picker did not load. The browser API key may be invalid, restricted to the wrong origin, or missing the Google Picker API.");
+        }
+      }, 12000);
+      setStatus("");
+    } catch (reason) {
+      pickerRef.current?.setVisible(false);
+      pickerRef.current = null;
+      if (pickerTimeoutRef.current !== null) window.clearTimeout(pickerTimeoutRef.current);
+      setStatus("");
+      setError(reason instanceof Error ? reason.message : "Google Drive could not be opened.");
+    }
+  }
+
+  function closeImportPanel() {
+    pickerRef.current?.setVisible(false);
+    pickerRef.current = null;
+    if (pickerTimeoutRef.current !== null) window.clearTimeout(pickerTimeoutRef.current);
+    setOpen(false);
+    setStatus("");
+    setError("");
+  }
+
+  async function preview(folderId: string, accessToken: string, mode: "main" | "student") {
+    setStatus("Scanning student folders...");
+    try {
+      const result = await api.post<{ id: string; items: DriveItem[] }>(`/api/exams/${examId}/imports/drive/preview`, { root_folder_id: folderId, access_token: accessToken, folder_mode: mode });
+      setBatchId(result.id);
+      setItems(result.items);
+      setAssignments(result.items.reduce<Record<string, string>>((current, item) => {
+        current[item.folder_id] = item.student_id ?? NEW_STUDENT;
+        return current;
+      }, {}));
+      setNewStudentNames(result.items.reduce<Record<string, string>>((current, item) => {
+        current[item.folder_id] = item.folder_name;
+        return current;
+      }, {}));
+      setStatus("Review the matches, then import the confirmed papers.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "The Drive folder could not be scanned.");
+      setStatus("");
+    }
+  }
+
+  async function commit() {
+    setStatus("Importing papers...");
+    try {
+      const existingAssignments = Object.fromEntries(Object.entries(assignments).filter(([, value]) => value !== NEW_STUDENT));
+      const newNames = Object.fromEntries(Object.entries(assignments)
+        .filter(([, value]) => value === NEW_STUDENT)
+        .map(([folderId]) => [folderId, newStudentNames[folderId] ?? ""]));
+      const skippedFolders = Object.entries(assignments)
+        .filter(([, value]) => value === SKIP_STUDENT)
+        .map(([folderId]) => folderId);
+      const result = await api.post<{ skipped?: string[] }>(`/api/imports/${batchId}/commit`, { access_token: token, assignments: existingAssignments, new_student_names: newNames, skipped_folders: skippedFolders });
+      const skipped = new Set(result.skipped ?? skippedFolders);
+      setStatus("Papers imported. Processing has started.");
+      setItems((current) => current.map((item) => skipped.has(item.folder_id) ? { ...item, status: "skipped", error: "Skipped by teacher." } : { ...item, status: "imported" }));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "The Drive papers could not be imported.");
+      setStatus("");
+    }
+  }
+
+  function isReadyToImport(item: DriveItem) {
+    const assignment = assignments[item.folder_id];
+    return Boolean(assignment) && (assignment === SKIP_STUDENT || (item.pages.length > 0 && (assignment !== NEW_STUDENT || (newStudentNames[item.folder_id] ?? item.folder_name).trim().length >= 2)));
+  }
+
+  const studentOptions = Array.from(new Map([...roster, ...allStudents].map((student) => [student.id, student])).values()).sort((left, right) => left.name.localeCompare(right.name));
+
+  return (
+    <section className="surface-lined mt-5 p-5">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+          <h3 className="font-serif text-2xl font-semibold">Import from Google Drive</h3>
+          <p className="mt-1 text-sm text-[var(--ink-muted)]">Choose the main papers folder or import one student folder directly.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="button-secondary" onClick={() => { setOpen(true); void chooseFolder("main"); }}>Choose main folder</button>
+          <button type="button" className="button-secondary" onClick={() => { setOpen(true); void chooseFolder("student"); }}>Choose student folder</button>
+        </div>
+      </div>
+      {open && <div className="mt-4 rounded-lg bg-[var(--surface-muted)] p-4">
+        <div className="mb-3 flex justify-end">
+          <button type="button" className="button-quiet px-2 py-1 text-xs" onClick={closeImportPanel}>Close</button>
+        </div>
+        {error && <p role="alert" className="text-sm text-[var(--review)]">{error}</p>}
+        {status && <p className="text-sm text-[var(--ink-muted)]">{status}</p>}
+        {!items.length && !error && <p className="text-xs text-[var(--ink-muted)]">Expected structure: `Students / Student Name / 1.jpeg, 2.jpeg`.</p>}
+        {items.length > 0 && <>
+           <div className="divide-y divide-[var(--line)] rounded-lg border border-[var(--line)] bg-[var(--surface)]">
+             {items.map((item) => <div key={item.folder_id} className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+               <div><strong>{item.folder_name}</strong><p className="text-xs text-[var(--ink-muted)]">{item.pages.length} pages · {item.error ?? item.status}</p></div>
+               <div className="flex w-full flex-col gap-2 sm:max-w-xs">
+                 <select aria-label={`Assign ${item.folder_name}`} value={assignments[item.folder_id] ?? ""} onChange={(event) => setAssignments((current) => ({ ...current, [item.folder_id]: event.target.value }))} className="input">
+                 <option value="">Choose student</option>
+                 {studentOptions.map((student) => <option key={student.id} value={student.id}>{student.name} ({student.identifier}){student.class_name ? ` · ${student.class_name}` : ""}</option>)}
+                 <option value={NEW_STUDENT}>New student</option>
+                 <option value={SKIP_STUDENT}>Skip this folder</option>
+                 </select>
+                 {assignments[item.folder_id] === NEW_STUDENT && <input aria-label={`New student name for ${item.folder_name}`} className="input" value={newStudentNames[item.folder_id] ?? item.folder_name} onChange={(event) => setNewStudentNames((current) => ({ ...current, [item.folder_id]: event.target.value }))} placeholder={item.folder_name} />}
+               </div>
+             </div>)}
+           </div>
+           <button type="button" className="button-primary mt-4" disabled={!batchId || items.some((item) => !isReadyToImport(item))} onClick={() => void commit()}>Import confirmed papers</button>
+         </>}
+      </div>}
+    </section>
+  );
+}
