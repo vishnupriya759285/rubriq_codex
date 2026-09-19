@@ -1,0 +1,364 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { AppShell } from "@/components/app-shell";
+import { api } from "@/lib/api";
+
+type Student = {
+  id: string;
+  name: string;
+  identifier: string;
+  profile?: { concepts: { concept: string; mastery: number }[] };
+  account?: { email: string; disabled: boolean } | null;
+};
+type ClassData = {
+  id: string;
+  name: string;
+  students: Student[];
+  exams: { id: string; title: string; subject: string }[];
+};
+type Analytics = {
+  student_count: number;
+  submission_count: number;
+  average_score: number;
+  concepts: { name: string; mastery: number; review_rate: number }[];
+  students: Student[];
+};
+
+export default function ClassPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const [data, setData] = useState<ClassData | null>(null);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [name, setName] = useState("");
+  const [identifier, setIdentifier] = useState("");
+  const [error, setError] = useState("");
+  const [csv, setCsv] = useState("");
+  const [studentSearch, setStudentSearch] = useState("");
+  const [searchingStudents, setSearchingStudents] = useState(false);
+  const [existingStudents, setExistingStudents] = useState<
+    { id: string; name: string; identifier: string; class_name: string }[]
+  >([]);
+  const [accountStudent, setAccountStudent] = useState<Student | null>(null);
+  const [accountEmail, setAccountEmail] = useState("");
+  const [temporaryPassword, setTemporaryPassword] = useState("");
+  const load = async (id: string) => {
+    const [nextData, nextAnalytics] = await Promise.all([
+      api.get<ClassData>(`/api/classes/${id}`),
+      api.get<Analytics>(`/api/classes/${id}/analytics`),
+    ]);
+    setData(nextData);
+    setAnalytics(nextAnalytics);
+  };
+  useEffect(() => {
+    params.then(({ id }) =>
+      load(id).catch(() => setError("This class could not be loaded.")),
+    );
+  }, [params]);
+  useEffect(() => {
+    setSearchingStudents(true);
+    const timer = window.setTimeout(
+      () =>
+        api
+          .get<
+            {
+              id: string;
+              name: string;
+              identifier: string;
+              class_name: string;
+            }[]
+          >(`/api/students?q=${encodeURIComponent(studentSearch)}`)
+          .then(setExistingStudents)
+          .catch(() => setExistingStudents([]))
+          .finally(() => setSearchingStudents(false)),
+      150,
+    );
+    return () => window.clearTimeout(timer);
+  }, [studentSearch]);
+  const availableStudents = existingStudents.filter(
+    (student) => !data?.students.some((current) => current.id === student.id),
+  );
+  async function addStudent(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!data || !name.trim() || !identifier.trim()) return;
+    try {
+      await api.post(`/api/classes/${data.id}/students`, {
+        name: name.trim(),
+        identifier: identifier.trim(),
+      });
+      setName("");
+      setIdentifier("");
+      await load(data.id);
+    } catch (reason) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "Student could not be added.",
+      );
+    }
+  }
+  async function addExisting(studentId: string) {
+    if (!data) return;
+    try {
+      await api.post(`/api/classes/${data.id}/memberships`, {
+        student_id: studentId,
+      });
+      setStudentSearch("");
+      setExistingStudents([]);
+      await load(data.id);
+    } catch (reason) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "Student could not be added to this class.",
+      );
+    }
+  }
+  async function importCsv(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!data) return;
+    const students = csv
+      .split(/\r?\n/)
+      .map((line) => line.split(",").map((cell) => cell.trim()))
+      .filter((cells) => cells.length >= 2 && cells[0] && cells[1])
+      .map(([studentName, studentIdentifier]) => ({
+        name: studentName,
+        identifier: studentIdentifier,
+      }));
+    if (!students.length) {
+      setError("Paste one student per line as name, identifier.");
+      return;
+    }
+    try {
+      await api.post(`/api/classes/${data.id}/students/import`, { students });
+      setCsv("");
+      await load(data.id);
+    } catch (reason) {
+      setError(
+        reason instanceof Error ? reason.message : "Roster import failed.",
+      );
+    }
+  }
+  async function provisionAccount(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!data || !accountStudent) return;
+    try {
+      await api.put(`/api/students/${accountStudent.id}/account`, {
+        email: accountEmail,
+        temporary_password: temporaryPassword,
+      });
+      setAccountStudent(null);
+      setAccountEmail("");
+      setTemporaryPassword("");
+      await load(data.id);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "The student account could not be provisioned.");
+    }
+  }
+  if (!data)
+    return (
+      <AppShell>
+        <p className="text-sm text-[var(--ink-muted)]">Loading class...</p>
+      </AppShell>
+    );
+  return (
+    <AppShell
+      actions={
+        <Link href="/exams/new" className="button-primary">
+          Create exam
+        </Link>
+      }
+    >
+      <section className="mx-auto max-w-6xl">
+        <div className="mb-8 flex flex-col justify-between gap-4 border-b border-[var(--line)] pb-7 sm:flex-row sm:items-end">
+          <div>
+            <Link
+              href="/classes"
+              className="text-sm font-semibold text-[var(--brand)]"
+            >
+              All classes
+            </Link>
+            <h1 className="mt-2 text-4xl font-semibold tracking-[-0.035em]">
+              {data.name}
+            </h1>
+          </div>
+          <span className="status-pill status-neutral">
+            {analytics?.submission_count ?? 0} papers assessed
+          </span>
+        </div>
+        {error && (
+          <p
+            role="alert"
+            className="mb-5 rounded-lg bg-[var(--review-soft)] p-4 text-sm text-[var(--review)]"
+          >
+            {error}
+          </p>
+        )}
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
+          <section className="surface p-6">
+            <h2 className="text-2xl font-semibold">Roster</h2>
+            <form
+              onSubmit={addStudent}
+              className="mt-5 grid gap-3 sm:grid-cols-[1fr_10rem_auto]"
+            >
+              <input
+                className="input"
+                aria-label="Student name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Student name"
+              />
+              <input
+                className="input"
+                aria-label="Student identifier"
+                value={identifier}
+                onChange={(event) => setIdentifier(event.target.value)}
+                placeholder="Identifier"
+              />
+              <button className="button-primary" type="submit">
+                Add student
+              </button>
+            </form>
+            <div className="mt-5 divide-y divide-[var(--line)]">
+              {data.students.map((student) => (
+                <div
+                  key={student.id}
+                  className="flex items-center justify-between gap-3 py-3 text-sm"
+                >
+                  <Link href={`/students/${student.id}`} className="min-w-0 hover:text-[var(--brand)]">
+                    <span className="block font-semibold">{student.name}</span>
+                    <span className="font-mono text-xs text-[var(--ink-muted)]">{student.identifier}</span>
+                  </Link>
+                  <button type="button" className="button-quiet shrink-0" onClick={() => { setAccountStudent(student); setAccountEmail(student.account?.email ?? ""); }}>
+                    {student.account ? "Reset access" : "Create access"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+          <section className="surface-lined p-6">
+            <h2 className="text-2xl font-semibold">Import roster</h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--ink-muted)]">
+              Paste CSV rows as <code>name, identifier</code>.
+            </p>
+            <form onSubmit={importCsv} className="mt-4">
+              <textarea
+                className="input min-h-36"
+                value={csv}
+                onChange={(event) => setCsv(event.target.value)}
+                placeholder="Arun Patel, STU-001\nMaya Chen, STU-002"
+              />
+              <button className="button-secondary mt-3" type="submit">
+                Import students
+              </button>
+            </form>
+            <div className="mt-6 border-t border-[var(--line)] pt-5">
+              <h3 className="font-semibold">Add an existing student</h3>
+              <p className="mt-1 text-sm text-[var(--ink-muted)]">Search the current roster by name or identifier.</p>
+              <input
+                value={studentSearch}
+                onChange={(event) => setStudentSearch(event.target.value)}
+                className="input mt-3"
+                placeholder="Search students by name or identifier"
+              />
+              <div className="mt-2 overflow-hidden rounded-lg border border-[var(--line)]">
+                {searchingStudents && <p className="px-3 py-2 text-sm text-[var(--ink-muted)]">Searching students...</p>}
+                {!searchingStudents && availableStudents.length === 0 && <p className="px-3 py-2 text-sm text-[var(--ink-muted)]">No available students match this search.</p>}
+                {availableStudents.length > 0 && (
+                  <>
+                  {availableStudents.map((student) => (
+                    <button
+                      key={student.id}
+                      type="button"
+                      onClick={() => void addExisting(student.id)}
+                      className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-[var(--surface-muted)]"
+                    >
+                      <span>
+                        <strong>{student.name}</strong>
+                        <span className="ml-2 text-[var(--ink-muted)]">
+                          {student.identifier} · {student.class_name}
+                        </span>
+                      </span>
+                      <span className="text-[var(--brand)]">Add</span>
+                    </button>
+                  ))}
+                  </>
+                )}
+              </div>
+            </div>
+          </section>
+        </div>
+        {accountStudent && (
+          <section className="surface mt-7 max-w-2xl p-6">
+            <h2 className="text-2xl font-semibold">Student access</h2>
+            <p className="mt-2 text-sm text-[var(--ink-muted)]">Set a temporary password for {accountStudent.name}. They will be asked to change it after sign-in.</p>
+            <form onSubmit={provisionAccount} className="mt-5 grid gap-3 sm:grid-cols-2">
+              <input className="input" type="email" required value={accountEmail} onChange={(event) => setAccountEmail(event.target.value)} placeholder="Student email" />
+              <input className="input" type="password" required minLength={1} value={temporaryPassword} onChange={(event) => setTemporaryPassword(event.target.value)} placeholder="Temporary password" />
+              <div className="flex gap-2 sm:col-span-2">
+                <button className="button-primary" type="submit">Save access</button>
+                <button className="button-quiet" type="button" onClick={() => setAccountStudent(null)}>Cancel</button>
+              </div>
+            </form>
+          </section>
+        )}
+        <section className="mt-7">
+          <h2 className="text-2xl font-semibold">
+            Class performance
+          </h2>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <Metric
+              label="Students"
+              value={String(analytics?.student_count ?? 0)}
+            />
+            <Metric
+              label="Papers"
+              value={String(analytics?.submission_count ?? 0)}
+            />
+            <Metric
+              label="Average score"
+              value={String(analytics?.average_score ?? 0)}
+            />
+          </div>
+          {analytics?.concepts.length ? (
+            <div className="surface-lined mt-5 divide-y divide-[var(--line)]">
+              {analytics.concepts.map((concept) => (
+                <div
+                  key={concept.name}
+                  className="grid grid-cols-[1fr_auto] gap-4 p-5"
+                >
+                  <div>
+                    <strong>{concept.name}</strong>
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-muted)]">
+                      <div
+                        className="h-full bg-[var(--brand)]"
+                        style={{ width: `${concept.mastery}%` }}
+                      />
+                    </div>
+                  </div>
+                  <span className="font-mono text-sm">{concept.mastery}%</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-5 text-sm text-[var(--ink-muted)]">
+              Performance will appear after assessed papers are uploaded.
+            </p>
+          )}
+        </section>
+      </section>
+    </AppShell>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="surface p-5">
+      <p className="text-sm text-[var(--ink-muted)]">{label}</p>
+      <p className="mt-1 text-3xl font-semibold">{value}</p>
+    </div>
+  );
+}
