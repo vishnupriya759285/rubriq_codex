@@ -5,7 +5,7 @@ const isDev = process.env.NODE_ENV !== "production";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
-  output: "standalone",
+  output: process.env.VERCEL ? undefined : (process.env.STANDALONE === "true" ? "standalone" : undefined),
   async headers() {
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com;"
