@@ -264,7 +264,7 @@ export default function ExamPage({
           <p className="mt-3 text-[#49616a]">{error}</p>
           <Link
             href="/login"
-            className="mt-6 inline-flex rounded-lg bg-[#0f5864] px-4 py-2 text-sm font-semibold text-white"
+            className="mt-6 inline-flex rounded-lg bg-[#17634e] px-4 py-2 text-sm font-semibold text-white"
           >
             Open sign in
           </Link>
@@ -325,13 +325,13 @@ export default function ExamPage({
               Add a student paper
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--ink-muted)]">
-              Upload a photographed or scanned answer sheet. Rubriq preserves the
-              original, normalizes each page, then uses it alongside the
+              Upload a photographed or scanned answer sheet. Rubriq preserves
+              the original, normalizes each page, then uses it alongside the
               transcription during grading.
             </p>
             <form onSubmit={upload} className="mt-7 space-y-5">
               {roster.length ? (
-                <label className="block text-sm font-semibold text-[#25454e]">
+                <label className="block text-sm font-semibold text-[#0d3d31]">
                   Student
                   <select
                     value={studentId}
@@ -353,7 +353,7 @@ export default function ExamPage({
                   </select>
                 </label>
               ) : (
-                <label className="block text-sm font-semibold text-[#25454e]">
+                <label className="block text-sm font-semibold text-[#0d3d31]">
                   Student name
                   <input
                     value={studentName}
@@ -635,9 +635,7 @@ export default function ExamPage({
         </div>
         <section className="mt-8">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">
-              Submitted papers
-            </h2>
+            <h2 className="text-2xl font-semibold">Submitted papers</h2>
             <Link
               href={`/submissions?exam_id=${exam.id}`}
               className="button-quiet"
@@ -659,7 +657,9 @@ export default function ExamPage({
                       {new Date(item.created_at).toLocaleDateString()}
                     </span>
                   </span>
-                  <span className="font-mono">{item.total_score}/{item.total_marks}</span>
+                  <span className="font-mono">
+                    {item.total_score}/{item.total_marks}
+                  </span>
                 </Link>
               ))
             ) : (

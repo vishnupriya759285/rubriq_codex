@@ -86,9 +86,7 @@ export default function StudentProfile({
         </div>
         <div className="grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
           <section className="surface p-6">
-            <h2 className="text-2xl font-semibold">
-              Concept performance
-            </h2>
+            <h2 className="text-2xl font-semibold">Concept performance</h2>
             <div className="mt-5 space-y-4">
               {profile.concepts.map((concept) => (
                 <div key={concept.concept}>
@@ -119,9 +117,7 @@ export default function StudentProfile({
           </section>
           <section className="surface overflow-hidden">
             <div className="border-b border-[var(--line)] p-6">
-              <h2 className="text-2xl font-semibold">
-                Uploaded papers
-              </h2>
+              <h2 className="text-2xl font-semibold">Uploaded papers</h2>
               <p className="mt-1 text-sm text-[var(--ink-muted)]">
                 Open any paper to inspect its source images and evidence.
               </p>

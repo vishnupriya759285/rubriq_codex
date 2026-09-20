@@ -22,22 +22,44 @@ export function AccountControl() {
   }
 
   if (!account) return null;
-
+  const initials = account.name
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
   return (
-    <div className="flex items-center gap-3 text-sm">
+    <div className="account-control">
       <Link
         href={account.role === "student" ? "/student" : "/"}
-        className="hidden text-[#566164] sm:inline"
+        className="account-profile"
+        title={account.name}
       >
-        {account.name}
+        <span className="account-avatar">{initials}</span>
+        <span className="account-copy">
+          <strong>{account.name}</strong>
+          <small>{account.role}</small>
+        </span>
       </Link>
       <button
         type="button"
         onClick={signOut}
         disabled={loggingOut}
-        className="font-medium text-[#173f4c] underline underline-offset-4 disabled:opacity-60"
+        className="account-signout"
+        aria-label="Sign out"
+        title="Sign out"
       >
-        {loggingOut ? "Signing out" : "Sign out"}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+        </svg>
       </button>
     </div>
   );

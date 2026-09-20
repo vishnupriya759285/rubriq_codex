@@ -39,7 +39,9 @@ export default function CampusQuestionsPage() {
   const [conceptFilter, setConceptFilter] = useState("");
 
   // Selected Question & Responses
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null,
+  );
   const [responses, setResponses] = useState<ResponseItem[]>([]);
   const [loadingResponses, setLoadingResponses] = useState(false);
   const [replyBody, setReplyBody] = useState("");
@@ -49,7 +51,9 @@ export default function CampusQuestionsPage() {
   const [openAskModal, setOpenAskModal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newBody, setNewBody] = useState("");
-  const [newMode, setNewMode] = useState<"anonymous" | "public" | "private">("anonymous");
+  const [newMode, setNewMode] = useState<"anonymous" | "public" | "private">(
+    "anonymous",
+  );
   const [newConcept, setNewConcept] = useState("");
   const [postingQuestion, setPostingQuestion] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -58,7 +62,9 @@ export default function CampusQuestionsPage() {
     try {
       setLoading(true);
       const mineParam = filterMode === "mine" ? "?mine=true" : "";
-      const conceptParam = conceptFilter ? `${mineParam ? "&" : "?"}concept=${encodeURIComponent(conceptFilter)}` : "";
+      const conceptParam = conceptFilter
+        ? `${mineParam ? "&" : "?"}concept=${encodeURIComponent(conceptFilter)}`
+        : "";
       const url = `/api/network/questions${mineParam}${conceptParam}`;
       const res = await api.get<{ items: Question[] }>(url as `/api/${string}`);
       const items = res.items || [];
@@ -80,9 +86,10 @@ export default function CampusQuestionsPage() {
   async function loadResponses(qId: string) {
     try {
       setLoadingResponses(true);
-      const res = await api.get<{ question: Question; responses: ResponseItem[] }>(
-        `/api/network/questions/${qId}` as `/api/${string}`
-      );
+      const res = await api.get<{
+        question: Question;
+        responses: ResponseItem[];
+      }>(`/api/network/questions/${qId}` as `/api/${string}`);
       setResponses(res.responses || []);
     } catch {
       setResponses([]);
@@ -102,9 +109,12 @@ export default function CampusQuestionsPage() {
     if (!selectedQuestion || !replyBody.trim() || submittingReply) return;
     setSubmittingReply(true);
     try {
-      await api.post(`/api/network/questions/${selectedQuestion.id}/responses`, {
-        body: replyBody.trim(),
-      });
+      await api.post(
+        `/api/network/questions/${selectedQuestion.id}/responses`,
+        {
+          body: replyBody.trim(),
+        },
+      );
       setReplyBody("");
       void loadResponses(selectedQuestion.id);
       // update responses_count locally
@@ -112,8 +122,8 @@ export default function CampusQuestionsPage() {
         prev.map((q) =>
           q.id === selectedQuestion.id
             ? { ...q, responses_count: q.responses_count + 1 }
-            : q
-        )
+            : q,
+        ),
       );
     } catch (err: any) {
       alert(err?.message || "Failed to submit answer.");
@@ -148,33 +158,45 @@ export default function CampusQuestionsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#fcfdfd] text-[#141f1c]">
+    <main className="min-h-screen bg-[#fcfdfb] text-[#14201c]">
       {/* Sticky Top Header */}
-      <header className="sticky top-0 z-30 border-b border-[#d8e2de] bg-white/95 backdrop-blur-md px-5 py-3.5 sm:px-8 shadow-xs">
+      <header className="sticky top-0 z-30 border-b border-[#dfe3de] bg-white/95 backdrop-blur-md px-5 py-3.5 sm:px-8 shadow-xs">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/student"
-              className="text-xl font-bold tracking-[-0.03em] text-[#0f4a3c] hover:opacity-90 transition-opacity"
+              className="text-xl font-bold tracking-[-0.03em] text-[#17634e] hover:opacity-90 transition-opacity"
             >
               Rubriq
             </Link>
-            <span className="hidden sm:inline-block rounded-md bg-[#e5f0ec] px-2.5 py-1 text-[11px] font-600 text-[#0a382d] leading-none">
+            <span className="hidden sm:inline-block rounded-md bg-[#dcebe4] px-2.5 py-1 text-[11px] font-600 text-[#0d3d31] leading-none">
               Campus Connect · Skill Q&amp;A
             </span>
           </div>
 
           <nav className="hidden md:flex items-center gap-5 text-sm font-medium">
-            <Link href="/student" className="text-[#51625d] hover:text-[#0f4a3c] transition-colors">
+            <Link
+              href="/student"
+              className="text-[#697770] hover:text-[#17634e] transition-colors"
+            >
               Dashboard
             </Link>
-            <Link href="/student/network" className="text-[#51625d] hover:text-[#0f4a3c] transition-colors">
+            <Link
+              href="/student/network"
+              className="text-[#697770] hover:text-[#17634e] transition-colors"
+            >
               Campus Connect
             </Link>
-            <Link href="/student/questions" className="font-semibold text-[#0f4a3c] border-b-2 border-[#0f4a3c] pb-0.5">
+            <Link
+              href="/student/questions"
+              className="font-semibold text-[#17634e] border-b-2 border-[#17634e] pb-0.5"
+            >
               Skill Q&A
             </Link>
-            <Link href="/student/connections" className="text-[#51625d] hover:text-[#0f4a3c] transition-colors">
+            <Link
+              href="/student/connections"
+              className="text-[#697770] hover:text-[#17634e] transition-colors"
+            >
               My Mentors
             </Link>
           </nav>
@@ -188,24 +210,27 @@ export default function CampusQuestionsPage() {
 
       {/* Main Container */}
       <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[#e2e8e5] pb-5 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[#dfe3de] pb-5 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[11px] font-semibold tracking-wide text-[#0a382d] bg-[#e5f0ec] px-2.5 py-1 rounded-md leading-none">
+              <span className="text-[11px] font-semibold tracking-wide text-[#0d3d31] bg-[#dcebe4] px-2.5 py-1 rounded-md leading-none">
                 Hands-on Technical Guidance
               </span>
             </div>
-            <h1 className="text-2xl font-bold tracking-[-0.025em] text-[#0d1a16] mt-2">
+            <h1 className="text-2xl font-bold tracking-[-0.025em] text-[#14201c] mt-2">
               Campus Skill Q&amp;A &amp; Technical Discussions
             </h1>
             <p className="mt-1.5 text-sm text-[#3d524c] max-w-2xl leading-relaxed">
-              Ask questions on technical architecture, frameworks, code debugging, hackathons, and research methodologies. Campus Connect is focused on practical skill development and engineering guidance beyond exams.
+              Ask questions on technical architecture, frameworks, code
+              debugging, hackathons, and research methodologies. Campus Connect
+              is focused on practical skill development and engineering guidance
+              beyond exams.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setOpenAskModal(true)}
-            className="py-2.5 px-5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs sm:text-sm font-bold shadow-xs transition-all flex items-center gap-1.5 self-start md:self-auto cursor-pointer"
+            className="py-2.5 px-5 rounded-xl bg-[#17634e] hover:bg-[#0d3d31] text-white text-xs sm:text-sm font-bold shadow-xs transition-all flex items-center gap-1.5 self-start md:self-auto cursor-pointer"
           >
             <span>+ Ask Skill Question</span>
           </button>
@@ -219,8 +244,8 @@ export default function CampusQuestionsPage() {
               onClick={() => setFilterMode("all")}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 filterMode === "all"
-                  ? "bg-[#0f4a3c] text-white shadow-xs"
-                  : "bg-[#f4f7f6] text-[#51625d] hover:bg-[#e5f0ec]"
+                  ? "bg-[#17634e] text-white shadow-xs"
+                  : "bg-[#f2f3ef] text-[#697770] hover:bg-[#dcebe4]"
               }`}
             >
               All Questions
@@ -230,8 +255,8 @@ export default function CampusQuestionsPage() {
               onClick={() => setFilterMode("mine")}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 filterMode === "mine"
-                  ? "bg-[#0f4a3c] text-white shadow-xs"
-                  : "bg-[#f4f7f6] text-[#51625d] hover:bg-[#e5f0ec]"
+                  ? "bg-[#17634e] text-white shadow-xs"
+                  : "bg-[#f2f3ef] text-[#697770] hover:bg-[#dcebe4]"
               }`}
             >
               My Questions
@@ -244,13 +269,13 @@ export default function CampusQuestionsPage() {
               value={conceptFilter}
               onChange={(e) => setConceptFilter(e.target.value)}
               placeholder="Filter by concept / tag..."
-              className="px-3.5 py-1.5 rounded-xl bg-[#f8faf9] border border-[#d8e2de] text-xs focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+              className="px-3.5 py-1.5 rounded-xl bg-[#f2f3ef] border border-[#dfe3de] text-xs focus:bg-white focus:border-[#17634e] focus:outline-none"
             />
             {conceptFilter && (
               <button
                 type="button"
                 onClick={() => setConceptFilter("")}
-                className="text-xs text-[#71827d] hover:underline"
+                className="text-xs text-[#8ea29a] hover:underline"
               >
                 Clear
               </button>
@@ -261,30 +286,41 @@ export default function CampusQuestionsPage() {
         {/* Master-Detail: Questions List (Left) & Thread Detail (Right) */}
         <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
           {/* Left Column: Questions List */}
-          <section className="rounded-2xl bg-white border border-[#d8e2de] shadow-xs overflow-hidden divide-y divide-[#e8eeec]">
+          <section className="rounded-2xl bg-white border border-[#dfe3de] shadow-xs overflow-hidden divide-y divide-[#dfe3de]">
             {loading && (
-              <div className="p-8 text-center text-sm text-[#51625d]">
+              <div className="p-8 text-center text-sm text-[#697770]">
                 Loading campus questions...
               </div>
             )}
 
             {!loading && questions.length === 0 && (
               <div className="p-10 text-center">
-                <div className="mx-auto w-10 h-10 rounded-full bg-[#e5f0ec] flex items-center justify-center text-[#0f4a3c] mb-3">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                <div className="mx-auto w-10 h-10 rounded-full bg-[#dcebe4] flex items-center justify-center text-[#17634e] mb-3">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.75}
+                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                    />
                   </svg>
                 </div>
-                <h4 className="font-semibold text-sm text-[#141f1c]">
+                <h4 className="font-semibold text-sm text-[#14201c]">
                   No campus questions posted yet.
                 </h4>
-                <p className="mt-1 text-xs text-[#51625d] max-w-xs mx-auto">
-                  Ask the first question! You can choose to post anonymously or with your name.
+                <p className="mt-1 text-xs text-[#697770] max-w-xs mx-auto">
+                  Ask the first question! You can choose to post anonymously or
+                  with your name.
                 </p>
                 <button
                   type="button"
                   onClick={() => setOpenAskModal(true)}
-                  className="mt-3.5 inline-block py-1.5 px-3.5 rounded-xl bg-[#0f4a3c] text-white text-xs font-semibold shadow-xs hover:bg-[#0b382d] cursor-pointer"
+                  className="mt-3.5 inline-block py-1.5 px-3.5 rounded-xl bg-[#17634e] text-white text-xs font-semibold shadow-xs hover:bg-[#0d3d31] cursor-pointer"
                 >
                   + Ask a Question
                 </button>
@@ -309,8 +345,8 @@ export default function CampusQuestionsPage() {
                   onClick={() => setSelectedQuestion(q)}
                   className={`w-full p-4 text-left transition-all cursor-pointer block border-l-3 ${
                     isSelected
-                      ? "bg-[#edf5f2] border-l-[#0f4a3c] shadow-2xs"
-                      : "border-l-transparent hover:bg-[#f8faf9]"
+                      ? "bg-[#dcebe4] border-l-[#17634e] shadow-2xs"
+                      : "border-l-transparent hover:bg-[#f2f3ef]"
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -320,7 +356,7 @@ export default function CampusQuestionsPage() {
                           🔒
                         </div>
                       ) : (
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0f4a3c] to-[#1a6654] text-white flex items-center justify-center text-xs font-bold shadow-2xs">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#17634e] to-[#23765f] text-white flex items-center justify-center text-xs font-bold shadow-2xs">
                           {authorInitials}
                         </div>
                       )}
@@ -329,7 +365,7 @@ export default function CampusQuestionsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <div className="flex items-center gap-1.5 truncate">
-                          <span className="text-xs font-bold text-[#0d1a16] truncate">
+                          <span className="text-xs font-bold text-[#14201c] truncate">
                             {q.author_display}
                           </span>
                           <span
@@ -337,32 +373,37 @@ export default function CampusQuestionsPage() {
                               isAnon
                                 ? "bg-gray-100 text-gray-700"
                                 : q.mode === "private"
-                                ? "bg-[#fff2e7] text-[#9d552d]"
-                                : "bg-[#e5f0ec] text-[#0f4a3c]"
+                                  ? "bg-[#fff2e7] text-[#9d552d]"
+                                  : "bg-[#dcebe4] text-[#17634e]"
                             }`}
                           >
-                            {isAnon ? "Anon" : q.mode === "private" ? "Private" : "Public"}
+                            {isAnon
+                              ? "Anon"
+                              : q.mode === "private"
+                                ? "Private"
+                                : "Public"}
                           </span>
                         </div>
-                        <span className="text-[10px] text-[#71827d] shrink-0">
+                        <span className="text-[10px] text-[#8ea29a] shrink-0">
                           {new Date(q.created_at).toLocaleDateString()}
                         </span>
                       </div>
 
-                      <h3 className="font-semibold text-[13.5px] text-[#0d1a16] leading-snug line-clamp-2 tracking-[-0.01em]">
+                      <h3 className="font-semibold text-[13.5px] text-[#14201c] leading-snug line-clamp-2 tracking-[-0.01em]">
                         {q.title}
                       </h3>
 
-                      <div className="mt-2 flex items-center justify-between text-xs text-[#51625d]">
+                      <div className="mt-2 flex items-center justify-between text-xs text-[#697770]">
                         {q.concept_tag ? (
-                          <span className="px-2 py-0.5 rounded-md bg-[#f0f5f3] text-[10.5px] font-medium text-[#0f4a3c] border border-[#d8e6e0]">
+                          <span className="px-2 py-0.5 rounded-md bg-[#eef6f1] text-[10.5px] font-medium text-[#17634e] border border-[#d8e6e0]">
                             {q.concept_tag}
                           </span>
                         ) : (
                           <span />
                         )}
-                        <span className="font-semibold text-[11px] text-[#0f4a3c] bg-[#e5f0ec] px-2 py-0.5 rounded-full">
-                          {q.responses_count} {q.responses_count === 1 ? "answer" : "answers"}
+                        <span className="font-semibold text-[11px] text-[#17634e] bg-[#dcebe4] px-2 py-0.5 rounded-full">
+                          {q.responses_count}{" "}
+                          {q.responses_count === 1 ? "answer" : "answers"}
                         </span>
                       </div>
                     </div>
@@ -373,58 +414,67 @@ export default function CampusQuestionsPage() {
           </section>
 
           {/* Right Column: Question Thread & Answers */}
-          <section className="rounded-2xl bg-white border border-[#d8e2de] shadow-xs p-6 flex flex-col justify-between">
+          <section className="rounded-2xl bg-white border border-[#dfe3de] shadow-xs p-6 flex flex-col justify-between">
             {selectedQuestion ? (
               <div className="space-y-6">
                 {/* Question Header */}
-                <div className="border-b border-[#e8eeec] pb-5">
-                  <div className="flex items-center gap-2 text-xs text-[#51625d] mb-2">
+                <div className="border-b border-[#dfe3de] pb-5">
+                  <div className="flex items-center gap-2 text-xs text-[#697770] mb-2">
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         selectedQuestion.mode === "anonymous"
                           ? "bg-gray-100 text-gray-700"
                           : selectedQuestion.mode === "private"
-                          ? "bg-[#fff2e7] text-[#9d552d]"
-                          : "bg-[#e5f0ec] text-[#0f4a3c]"
+                            ? "bg-[#fff2e7] text-[#9d552d]"
+                            : "bg-[#dcebe4] text-[#17634e]"
                       }`}
                     >
-                      {selectedQuestion.mode === "anonymous" ? "🔒 Anonymous Post" : selectedQuestion.mode === "private" ? "✉ Private Request" : "Public Campus Post"}
+                      {selectedQuestion.mode === "anonymous"
+                        ? "🔒 Anonymous Post"
+                        : selectedQuestion.mode === "private"
+                          ? "✉ Private Request"
+                          : "Public Campus Post"}
                     </span>
                     <span>· Asked by {selectedQuestion.author_display}</span>
-                    <span>· {new Date(selectedQuestion.created_at).toLocaleDateString()}</span>
+                    <span>
+                      ·{" "}
+                      {new Date(
+                        selectedQuestion.created_at,
+                      ).toLocaleDateString()}
+                    </span>
                   </div>
 
-                  <h2 className="text-xl font-bold text-[#0d1a16] leading-snug tracking-[-0.02em]">
+                  <h2 className="text-xl font-bold text-[#14201c] leading-snug tracking-[-0.02em]">
                     {selectedQuestion.title}
                   </h2>
 
                   {selectedQuestion.concept_tag && (
                     <div className="mt-2">
-                      <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#e5f0ec] text-xs font-semibold text-[#0f4a3c]">
+                      <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#dcebe4] text-xs font-semibold text-[#17634e]">
                         Concept: {selectedQuestion.concept_tag}
                       </span>
                     </div>
                   )}
 
-                  <div className="mt-4 text-sm text-[#31423d] leading-relaxed whitespace-pre-line bg-[#f8faf9] p-4 rounded-xl border border-[#e8eeec]">
+                  <div className="mt-4 text-sm text-[#31423d] leading-relaxed whitespace-pre-line bg-[#f2f3ef] p-4 rounded-xl border border-[#dfe3de]">
                     {selectedQuestion.body}
                   </div>
                 </div>
 
                 {/* Answers / Responses Section */}
                 <div>
-                  <h3 className="text-[15px] font-semibold text-[#0d1a16] mb-3 tracking-[-0.01em]">
+                  <h3 className="text-[15px] font-semibold text-[#14201c] mb-3 tracking-[-0.01em]">
                     Answers ({responses.length})
                   </h3>
 
                   {loadingResponses && (
-                    <div className="p-4 text-center text-xs text-[#51625d]">
+                    <div className="p-4 text-center text-xs text-[#697770]">
                       Loading answers...
                     </div>
                   )}
 
                   {!loadingResponses && responses.length === 0 && (
-                    <div className="p-6 text-center text-xs text-[#71827d] bg-[#fafcfb] rounded-xl border border-dashed border-[#d8e2de]">
+                    <div className="p-6 text-center text-xs text-[#8ea29a] bg-[#fcfdfb] rounded-xl border border-dashed border-[#dfe3de]">
                       No answers yet. Share your knowledge or guidance below!
                     </div>
                   )}
@@ -433,24 +483,27 @@ export default function CampusQuestionsPage() {
                     {responses.map((resp) => (
                       <div
                         key={resp.id}
-                        className="p-4 rounded-xl bg-white border border-[#d8e2de] shadow-2xs space-y-2"
+                        className="p-4 rounded-xl bg-white border border-[#dfe3de] shadow-2xs space-y-2"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-xs sm:text-sm text-[#141f1c]">
+                            <span className="font-bold text-xs sm:text-sm text-[#14201c]">
                               {resp.responder_name}
                             </span>
-                            <span className="text-[11px] text-[#51625d] bg-[#f4f7f6] px-2 py-0.5 rounded-md">
+                            <span className="text-[11px] text-[#697770] bg-[#f2f3ef] px-2 py-0.5 rounded-md">
                               {resp.responder_role}
                             </span>
                             {resp.verified_badges?.length > 0 && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0f4a3c] bg-[#e5f0ec] px-2 py-0.5 rounded-full border border-[#bcd7cd]">
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#17634e] bg-[#dcebe4] px-2 py-0.5 rounded-full border border-[#cfd6d0]">
                                 ✓ {resp.verified_badges[0]}
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] text-[#71827d]">
-                            {new Date(resp.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          <span className="text-[10px] text-[#8ea29a]">
+                            {new Date(resp.created_at).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </span>
                         </div>
 
@@ -463,8 +516,11 @@ export default function CampusQuestionsPage() {
                 </div>
 
                 {/* Reply Form */}
-                <form onSubmit={handlePostReply} className="pt-4 border-t border-[#e8eeec] space-y-2.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#51625d]">
+                <form
+                  onSubmit={handlePostReply}
+                  className="pt-4 border-t border-[#dfe3de] space-y-2.5"
+                >
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#697770]">
                     Your Answer or Guidance
                   </label>
                   <textarea
@@ -473,13 +529,13 @@ export default function CampusQuestionsPage() {
                     value={replyBody}
                     onChange={(e) => setReplyBody(e.target.value)}
                     placeholder="Write a helpful, grounded explanation or suggest study steps..."
-                    className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                   />
                   <div className="flex justify-end">
                     <button
                       type="submit"
                       disabled={submittingReply || !replyBody.trim()}
-                      className="py-2 px-5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                      className="py-2 px-5 rounded-xl bg-[#17634e] hover:bg-[#0d3d31] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
                     >
                       {submittingReply ? "Posting..." : "Submit Answer"}
                     </button>
@@ -487,7 +543,7 @@ export default function CampusQuestionsPage() {
                 </form>
               </div>
             ) : (
-              <div className="p-12 text-center text-[#71827d] my-auto">
+              <div className="p-12 text-center text-[#8ea29a] my-auto">
                 Select a question on the left to view discussions and answers.
               </div>
             )}
@@ -498,13 +554,13 @@ export default function CampusQuestionsPage() {
       {/* ------------------- MODAL: ASK A QUESTION ------------------- */}
       {openAskModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-[#d8e2de] animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-[#e8eeec]">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-[#dfe3de] animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dfe3de]">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#0f4a3c]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#17634e]">
                   Campus Knowledge Network
                 </span>
-                <h3 className="text-lg font-bold text-[#0d1a16] tracking-[-0.02em]">
+                <h3 className="text-lg font-bold text-[#14201c] tracking-[-0.02em]">
                   Ask a Question
                 </h3>
               </div>
@@ -523,15 +579,19 @@ export default function CampusQuestionsPage() {
               </div>
             )}
 
-            <div className="mt-3 p-3 rounded-xl bg-[#e5f0ec]/70 border border-[#cbe2da] text-[11px] text-[#0f4a3c] flex items-center gap-2">
+            <div className="mt-3 p-3 rounded-xl bg-[#dcebe4]/70 border border-[#cbe2da] text-[11px] text-[#17634e] flex items-center gap-2">
               <span>💡</span>
-              <span>Campus Connect Q&A is focused on practical skills, tech stacks, and project roadmaps. (Please do not post exam questions or exam answers).</span>
+              <span>
+                Campus Connect Q&A is focused on practical skills, tech stacks,
+                and project roadmaps. (Please do not post exam questions or exam
+                answers).
+              </span>
             </div>
 
             <form onSubmit={handleCreateQuestion} className="mt-4 space-y-4">
               {/* 3 Privacy Modes */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#51625d] mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#697770] mb-2">
                   Question Visibility
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -540,30 +600,34 @@ export default function CampusQuestionsPage() {
                     onClick={() => setNewMode("anonymous")}
                     className={`p-2.5 rounded-xl text-center border transition-all cursor-pointer ${
                       newMode === "anonymous"
-                        ? "border-[#0f4a3c] bg-[#e5f0ec] text-[#0f4a3c] font-bold"
-                        : "border-[#d8e2de] bg-[#f8faf9] text-[#51625d]"
+                        ? "border-[#17634e] bg-[#dcebe4] text-[#17634e] font-bold"
+                        : "border-[#dfe3de] bg-[#f2f3ef] text-[#697770]"
                     }`}
                   >
                     <div className="text-xs font-bold">🔒 Anonymous</div>
-                    <div className="text-[10px] opacity-75">Your name hidden from peers</div>
+                    <div className="text-[10px] opacity-75">
+                      Your name hidden from peers
+                    </div>
                   </button>
                   <button
                     type="button"
                     onClick={() => setNewMode("public")}
                     className={`p-2.5 rounded-xl text-center border transition-all cursor-pointer ${
                       newMode === "public"
-                        ? "border-[#0f4a3c] bg-[#e5f0ec] text-[#0f4a3c] font-bold"
-                        : "border-[#d8e2de] bg-[#f8faf9] text-[#51625d]"
+                        ? "border-[#17634e] bg-[#dcebe4] text-[#17634e] font-bold"
+                        : "border-[#dfe3de] bg-[#f2f3ef] text-[#697770]"
                     }`}
                   >
                     <div className="text-xs font-bold">Show My Name</div>
-                    <div className="text-[10px] opacity-75">Public campus profile</div>
+                    <div className="text-[10px] opacity-75">
+                      Public campus profile
+                    </div>
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                <label className="block text-xs font-semibold text-[#14201c] mb-1">
                   Skill Question Title
                 </label>
                 <input
@@ -572,12 +636,12 @@ export default function CampusQuestionsPage() {
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="e.g. How do I architect state management in Next.js or prepare for a hackathon?"
-                  className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                  className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                <label className="block text-xs font-semibold text-[#14201c] mb-1">
                   Skill Domain / Topic Tag (Optional)
                 </label>
                 <input
@@ -585,12 +649,12 @@ export default function CampusQuestionsPage() {
                   value={newConcept}
                   onChange={(e) => setNewConcept(e.target.value)}
                   placeholder="e.g. Computer Vision, React, Hackathons, Embedded Systems"
-                  className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                  className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                <label className="block text-xs font-semibold text-[#14201c] mb-1">
                   Technical Context & Details
                 </label>
                 <textarea
@@ -599,7 +663,7 @@ export default function CampusQuestionsPage() {
                   value={newBody}
                   onChange={(e) => setNewBody(e.target.value)}
                   placeholder="Provide context on your tech stack, architecture, code snippets, or what you've tried so far..."
-                  className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                  className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                 />
               </div>
 
@@ -607,14 +671,14 @@ export default function CampusQuestionsPage() {
                 <button
                   type="button"
                   onClick={() => setOpenAskModal(false)}
-                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[#51625d] hover:bg-[#f4f7f6] cursor-pointer"
+                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[#697770] hover:bg-[#f2f3ef] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={postingQuestion}
-                  className="py-2.5 px-5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-60"
+                  className="py-2.5 px-5 rounded-xl bg-[#17634e] hover:bg-[#0d3d31] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-60"
                 >
                   {postingQuestion ? "Posting..." : "Post Skill Question →"}
                 </button>

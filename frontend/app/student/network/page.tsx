@@ -65,7 +65,9 @@ export default function CampusNetworkPage() {
   const initialConcept = searchParams.get("concept") || "";
   const practiceWithAi = searchParams.get("practice") === "ai";
 
-  const [activeTab, setActiveTab] = useState<"directory" | "my-profile">("directory");
+  const [activeTab, setActiveTab] = useState<"directory" | "my-profile">(
+    "directory",
+  );
 
   // Directory & Search state
   const [categories, setCategories] = useState<Category[]>([]);
@@ -75,24 +77,32 @@ export default function CampusNetworkPage() {
   const [loading, setLoading] = useState(true);
   const [matching, setMatching] = useState(false);
   const [searchMessage, setSearchMessage] = useState<string | null>(null);
-  const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
+  const [expandedProjects, setExpandedProjects] = useState<
+    Record<string, boolean>
+  >({});
   const toggleProjects = (id: string) => {
     setExpandedProjects((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   // Connection Request Modal
-  const [targetMentorForConnection, setTargetMentorForConnection] = useState<Mentor | null>(null);
+  const [targetMentorForConnection, setTargetMentorForConnection] =
+    useState<Mentor | null>(null);
   const [connectionNote, setConnectionNote] = useState("");
   const [connectionConcept, setConnectionConcept] = useState(initialConcept);
   const [sendingConnection, setSendingConnection] = useState(false);
-  const [connectionSuccess, setConnectionSuccess] = useState<string | null>(null);
+  const [connectionSuccess, setConnectionSuccess] = useState<string | null>(
+    null,
+  );
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // Question Modal
-  const [targetMentorForQuestion, setTargetMentorForQuestion] = useState<Mentor | null>(null);
+  const [targetMentorForQuestion, setTargetMentorForQuestion] =
+    useState<Mentor | null>(null);
   const [questionTitle, setQuestionTitle] = useState("");
   const [questionBody, setQuestionBody] = useState("");
-  const [questionMode, setQuestionMode] = useState<"anonymous" | "public" | "private">("anonymous");
+  const [questionMode, setQuestionMode] = useState<
+    "anonymous" | "public" | "private"
+  >("anonymous");
   const [questionConcept, setQuestionConcept] = useState(initialConcept);
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
   const [questionSuccess, setQuestionSuccess] = useState<string | null>(null);
@@ -116,7 +126,9 @@ export default function CampusNetworkPage() {
   const [projectTitle, setProjectTitle] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
   const [projectLink, setProjectLink] = useState("");
-  const [projectsList, setProjectsList] = useState<{ title: string; description: string; link?: string }[]>([]);
+  const [projectsList, setProjectsList] = useState<
+    { title: string; description: string; link?: string }[]
+  >([]);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
 
@@ -152,7 +164,9 @@ export default function CampusNetworkPage() {
     try {
       setLoading(true);
       setSearchMessage(null);
-      const url = catId ? `/api/network/mentors?category=${catId}` : "/api/network/mentors";
+      const url = catId
+        ? `/api/network/mentors?category=${catId}`
+        : "/api/network/mentors";
       const res = await api.get<{ items: Mentor[] }>(url as `/api/${string}`);
       setMentors(res.items || []);
     } catch {
@@ -163,7 +177,9 @@ export default function CampusNetworkPage() {
   }
 
   async function runNaturalMatch(queryOverride?: string) {
-    const q = (queryOverride !== undefined ? queryOverride : naturalQuery).trim();
+    const q = (
+      queryOverride !== undefined ? queryOverride : naturalQuery
+    ).trim();
     if (!q) {
       void loadMentors(selectedCategory);
       return;
@@ -178,7 +194,7 @@ export default function CampusNetworkPage() {
         message: string;
       }>("/api/network/match", {
         query: q,
-        concept_tag: initialConcept || undefined
+        concept_tag: initialConcept || undefined,
       });
       setMentors(res.matched_mentors || []);
       setSearchMessage(res.message);
@@ -233,8 +249,14 @@ export default function CampusNetworkPage() {
     setProfileSaving(true);
     setProfileSaveSuccess(false);
     try {
-      const skills = skillsText.split(",").map((s) => s.trim()).filter(Boolean);
-      const topics = topicsText.split(",").map((t) => t.trim()).filter(Boolean);
+      const skills = skillsText
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const topics = topicsText
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
       await api.post("/api/network/profile/me", {
         display_name: displayName,
         display_role: displayRole,
@@ -286,7 +308,9 @@ export default function CampusNetworkPage() {
         category_id: applyCategory,
         concept_tag: applyConcept.trim(),
       });
-      setApplySuccess(`Expertise application for '${applyConcept.trim()}' submitted! Institutional Admin will review and verify your badge.`);
+      setApplySuccess(
+        `Expertise application for '${applyConcept.trim()}' submitted! Institutional Admin will review and verify your badge.`,
+      );
       setApplyConcept("");
       void loadMyProfile();
     } catch (err: any) {
@@ -307,13 +331,15 @@ export default function CampusNetworkPage() {
         concept_tag: connectionConcept || undefined,
         note: connectionNote.trim() || undefined,
       });
-      setConnectionSuccess("Connection request sent! You will be notified once accepted.");
+      setConnectionSuccess(
+        "Connection request sent! You will be notified once accepted.",
+      );
       setMentors((prev) =>
         prev.map((m) =>
           m.id === targetMentorForConnection.id
             ? { ...m, connection_state: "pending" }
-            : m
-        )
+            : m,
+        ),
       );
       setTimeout(() => {
         setTargetMentorForConnection(null);
@@ -340,7 +366,9 @@ export default function CampusNetworkPage() {
         target_mentor_id: targetMentorForQuestion?.id || undefined,
         concept_tag: questionConcept.trim() || undefined,
       });
-      setQuestionSuccess("Your question has been posted to the Campus Network!");
+      setQuestionSuccess(
+        "Your question has been posted to the Campus Network!",
+      );
       setTimeout(() => {
         setTargetMentorForQuestion(null);
         setQuestionTitle("");
@@ -355,33 +383,45 @@ export default function CampusNetworkPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#fcfdfd] text-[#141f1c]">
+    <main className="min-h-screen bg-[#fcfdfb] text-[#14201c]">
       {/* Sticky Top Header */}
-      <header className="sticky top-0 z-30 border-b border-[#d8e2de] bg-white/95 backdrop-blur-md px-5 py-3.5 sm:px-8 shadow-xs">
+      <header className="sticky top-0 z-30 border-b border-[#dfe3de] bg-white/95 backdrop-blur-md px-5 py-3.5 sm:px-8 shadow-xs">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/student"
-              className="text-xl font-bold tracking-[-0.03em] text-[#0f4a3c] hover:opacity-95 transition-opacity"
+              className="text-xl font-bold tracking-[-0.03em] text-[#17634e] hover:opacity-95 transition-opacity"
             >
               Rubriq
             </Link>
-            <span className="hidden sm:inline-block rounded-full bg-[#e5f0ec] px-2.5 py-0.5 text-xs font-semibold text-[#0f4a3c]">
+            <span className="hidden sm:inline-block rounded-full bg-[#dcebe4] px-2.5 py-0.5 text-xs font-semibold text-[#17634e]">
               Campus Connect · Skill Network
             </span>
           </div>
 
           <nav className="hidden md:flex items-center gap-5 text-sm font-medium">
-            <Link href="/student" className="text-[#51625d] hover:text-[#0f4a3c] transition-colors">
+            <Link
+              href="/student"
+              className="text-[#697770] hover:text-[#17634e] transition-colors"
+            >
               Dashboard
             </Link>
-            <Link href="/student/network" className="font-semibold text-[#0f4a3c] border-b-2 border-[#0f4a3c] pb-0.5">
+            <Link
+              href="/student/network"
+              className="font-semibold text-[#17634e] border-b-2 border-[#17634e] pb-0.5"
+            >
               Campus Connect
             </Link>
-            <Link href="/student/questions" className="text-[#51625d] hover:text-[#0f4a3c] transition-colors">
+            <Link
+              href="/student/questions"
+              className="text-[#697770] hover:text-[#17634e] transition-colors"
+            >
               Skill Q&A
             </Link>
-            <Link href="/student/connections" className="text-[#51625d] hover:text-[#0f4a3c] transition-colors">
+            <Link
+              href="/student/connections"
+              className="text-[#697770] hover:text-[#17634e] transition-colors"
+            >
               My Mentors
             </Link>
           </nav>
@@ -397,13 +437,23 @@ export default function CampusNetworkPage() {
       <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
         {/* Banner with contextual concept alert if referred from low mastery */}
         {initialConcept && (
-          <div className="mb-6 p-4 rounded-2xl bg-[#e5f0ec] border border-[#bcd7cd] text-[#0f4a3c] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="mb-6 p-4 rounded-2xl bg-[#dcebe4] border border-[#cfd6d0] text-[#17634e] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-2.5">
-              <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              <svg
+                className="w-5 h-5 shrink-0"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clipRule="evenodd"
+                />
               </svg>
               <div>
-                <span className="font-bold text-sm block">Focusing on practical mastery of: {initialConcept}</span>
+                <span className="font-bold text-sm block">
+                  Focusing on practical mastery of: {initialConcept}
+                </span>
                 <span className="text-xs opacity-90">
                   {practiceWithAi
                     ? "Interactive AI guidance is preparing practical exercises, or connect with a hands-on mentor below."
@@ -424,14 +474,14 @@ export default function CampusNetworkPage() {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-3 border-b border-[#e2e8e5] pb-3 mb-7">
+        <div className="flex items-center gap-3 border-b border-[#dfe3de] pb-3 mb-7">
           <button
             type="button"
             onClick={() => setActiveTab("directory")}
             className={`pb-2 text-sm sm:text-base font-bold transition-all cursor-pointer ${
               activeTab === "directory"
-                ? "text-[#0f4a3c] border-b-2 border-[#0f4a3c]"
-                : "text-[#71827d] hover:text-[#141f1c]"
+                ? "text-[#17634e] border-b-2 border-[#17634e]"
+                : "text-[#8ea29a] hover:text-[#14201c]"
             }`}
           >
             Find Skill Mentors & Tech Expertise
@@ -441,8 +491,8 @@ export default function CampusNetworkPage() {
             onClick={() => setActiveTab("my-profile")}
             className={`pb-2 text-sm sm:text-base font-bold transition-all cursor-pointer ${
               activeTab === "my-profile"
-                ? "text-[#0f4a3c] border-b-2 border-[#0f4a3c]"
-                : "text-[#71827d] hover:text-[#141f1c]"
+                ? "text-[#17634e] border-b-2 border-[#17634e]"
+                : "text-[#8ea29a] hover:text-[#14201c]"
             }`}
           >
             Become a Skill Mentor / My Profile
@@ -453,7 +503,7 @@ export default function CampusNetworkPage() {
         {activeTab === "directory" && (
           <div className="space-y-8">
             {/* "Who Can Help Me?" Natural Query Section */}
-            <section className="rounded-3xl bg-gradient-to-br from-[#0f4a3c] via-[#125344] to-[#0a382d] text-white p-6 sm:p-8 shadow-md relative overflow-hidden">
+            <section className="rounded-3xl bg-gradient-to-br from-[#17634e] via-[#23765f] to-[#0d3d31] text-white p-6 sm:p-8 shadow-md relative overflow-hidden">
               <div className="relative z-10 max-w-3xl">
                 <span className="inline-block rounded-full bg-white/20 backdrop-blur-md px-3.5 py-1 text-xs font-semibold tracking-wide uppercase text-white border border-white/25">
                   Skill Development & Project Guidance
@@ -462,7 +512,10 @@ export default function CampusNetworkPage() {
                   Who Can Guide My Practical Skills?
                 </h1>
                 <p className="mt-1.5 text-xs sm:text-sm text-emerald-100 leading-relaxed">
-                  Looking to master a framework, prepare for a hackathon, build a portfolio project, or debug complex architecture? Rubriq connects you with verified campus mentors based on genuine hands-on expertise.
+                  Looking to master a framework, prepare for a hackathon, build
+                  a portfolio project, or debug complex architecture? Rubriq
+                  connects you with verified campus mentors based on genuine
+                  hands-on expertise.
                 </p>
 
                 <form
@@ -473,9 +526,19 @@ export default function CampusNetworkPage() {
                   className="mt-5 flex flex-col sm:flex-row items-stretch gap-2.5"
                 >
                   <div className="relative flex-1">
-                    <span className="absolute left-3.5 top-3.5 text-[#5e706b] pointer-events-none">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <span className="absolute left-3.5 top-3.5 text-[#697770] pointer-events-none">
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
                       </svg>
                     </span>
                     <input
@@ -483,13 +546,13 @@ export default function CampusNetworkPage() {
                       value={naturalQuery}
                       onChange={(e) => setNaturalQuery(e.target.value)}
                       placeholder='e.g. "Build a fullstack Next.js app", "How to prepare for hackathons", "Computer vision with PyTorch", "React & TypeScript"...'
-                      className="w-full pl-11 pr-4 py-3 bg-white text-[#141f1c] rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e5f0ec]"
+                      className="w-full pl-11 pr-4 py-3 bg-white text-[#14201c] rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#dcebe4]"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={matching}
-                    className="py-3 px-6 rounded-xl bg-[#e5f0ec] hover:bg-white text-[#0f4a3c] font-bold text-sm transition-all shadow-xs shrink-0 cursor-pointer disabled:opacity-60"
+                    className="py-3 px-6 rounded-xl bg-[#dcebe4] hover:bg-white text-[#17634e] font-bold text-sm transition-all shadow-xs shrink-0 cursor-pointer disabled:opacity-60"
                   >
                     {matching ? "Searching..." : "Find Skill Mentors →"}
                   </button>
@@ -501,8 +564,12 @@ export default function CampusNetworkPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setNaturalQuery("I want to build fullstack web apps with React and APIs");
-                      void runNaturalMatch("I want to build fullstack web apps with React and APIs");
+                      setNaturalQuery(
+                        "I want to build fullstack web apps with React and APIs",
+                      );
+                      void runNaturalMatch(
+                        "I want to build fullstack web apps with React and APIs",
+                      );
                     }}
                     className="bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded text-white transition-colors cursor-pointer"
                   >
@@ -511,8 +578,12 @@ export default function CampusNetworkPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setNaturalQuery("Who can guide me for computer vision and PyTorch models?");
-                      void runNaturalMatch("Who can guide me for computer vision and PyTorch models?");
+                      setNaturalQuery(
+                        "Who can guide me for computer vision and PyTorch models?",
+                      );
+                      void runNaturalMatch(
+                        "Who can guide me for computer vision and PyTorch models?",
+                      );
                     }}
                     className="bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded text-white transition-colors cursor-pointer"
                   >
@@ -521,8 +592,12 @@ export default function CampusNetworkPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setNaturalQuery("How do I prepare and build a project for a competitive hackathon?");
-                      void runNaturalMatch("How do I prepare and build a project for a competitive hackathon?");
+                      setNaturalQuery(
+                        "How do I prepare and build a project for a competitive hackathon?",
+                      );
+                      void runNaturalMatch(
+                        "How do I prepare and build a project for a competitive hackathon?",
+                      );
                     }}
                     className="bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded text-white transition-colors cursor-pointer"
                   >
@@ -531,8 +606,12 @@ export default function CampusNetworkPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setNaturalQuery("Who can guide me for machine learning and data science?");
-                      void runNaturalMatch("Who can guide me for machine learning and data science?");
+                      setNaturalQuery(
+                        "Who can guide me for machine learning and data science?",
+                      );
+                      void runNaturalMatch(
+                        "Who can guide me for machine learning and data science?",
+                      );
                     }}
                     className="bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded text-white transition-colors cursor-pointer"
                   >
@@ -545,7 +624,7 @@ export default function CampusNetworkPage() {
             {/* Category Pills Filter */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#51625d]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#697770]">
                   Browse Skill Domains
                 </h3>
                 {selectedCategory && (
@@ -554,7 +633,7 @@ export default function CampusNetworkPage() {
                       setSelectedCategory("");
                       void loadMentors();
                     }}
-                    className="text-xs text-[#0f4a3c] font-semibold hover:underline cursor-pointer"
+                    className="text-xs text-[#17634e] font-semibold hover:underline cursor-pointer"
                   >
                     Show all categories
                   </button>
@@ -569,8 +648,8 @@ export default function CampusNetworkPage() {
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all cursor-pointer ${
                     !selectedCategory
-                      ? "bg-[#0f4a3c] text-white shadow-xs"
-                      : "bg-[#f4f7f6] text-[#51625d] hover:bg-[#e5f0ec]"
+                      ? "bg-[#17634e] text-white shadow-xs"
+                      : "bg-[#f2f3ef] text-[#697770] hover:bg-[#dcebe4]"
                   }`}
                 >
                   All Categories
@@ -587,8 +666,8 @@ export default function CampusNetworkPage() {
                       }}
                       className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all cursor-pointer ${
                         isSelected
-                          ? "bg-[#0f4a3c] text-white shadow-xs"
-                          : "bg-[#f4f7f6] text-[#51625d] hover:bg-[#e5f0ec]"
+                          ? "bg-[#17634e] text-white shadow-xs"
+                          : "bg-[#f2f3ef] text-[#697770] hover:bg-[#dcebe4]"
                       }`}
                     >
                       {cat.name}
@@ -600,9 +679,17 @@ export default function CampusNetworkPage() {
 
             {/* Search Match Status Message */}
             {searchMessage && (
-              <div className="p-3.5 rounded-xl bg-[#f8faf9] border border-[#d8e2de] text-xs font-medium text-[#141f1c] flex items-center gap-2">
-                <svg className="w-4 h-4 text-[#0f4a3c] shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <div className="p-3.5 rounded-xl bg-[#f2f3ef] border border-[#dfe3de] text-xs font-medium text-[#14201c] flex items-center gap-2">
+                <svg
+                  className="w-4 h-4 text-[#17634e] shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <span>{searchMessage}</span>
               </div>
@@ -612,42 +699,56 @@ export default function CampusNetworkPage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-[#0d1a16] tracking-[-0.025em]">
+                  <h2 className="text-xl font-bold text-[#14201c] tracking-[-0.025em]">
                     Verified Campus Skill Mentors
                   </h2>
-                  <p className="text-xs text-[#51625d] mt-0.5">
-                    Faculty, seniors, and alumni verified for real-world technologies, project building, and practical guidance.
+                  <p className="text-xs text-[#697770] mt-0.5">
+                    Faculty, seniors, and alumni verified for real-world
+                    technologies, project building, and practical guidance.
                   </p>
                 </div>
-                <span className="text-xs font-semibold text-[#51625d] bg-[#eef3f1] px-2.5 py-1 rounded-full">
+                <span className="text-xs font-semibold text-[#697770] bg-[#ecefeb] px-2.5 py-1 rounded-full">
                   {mentors.length} available
                 </span>
               </div>
 
               {loading && (
-                <div className="rounded-2xl bg-white border border-[#d8e2de] p-12 text-center text-sm text-[#51625d]">
+                <div className="rounded-2xl bg-white border border-[#dfe3de] p-12 text-center text-sm text-[#697770]">
                   Loading verified skill mentors...
                 </div>
               )}
 
               {/* STRICT RULE: Genuine Empty State when DB has no records. NO FAKE DATA! */}
               {!loading && mentors.length === 0 && (
-                <div className="rounded-3xl bg-white border border-[#d8e2de] p-12 text-center shadow-xs">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-[#e5f0ec] flex items-center justify-center text-[#0f4a3c] mb-3.5">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <div className="rounded-3xl bg-white border border-[#dfe3de] p-12 text-center shadow-xs">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-[#dcebe4] flex items-center justify-center text-[#17634e] mb-3.5">
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.75}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
                     </svg>
                   </div>
-                  <h3 className="text-[15px] font-semibold text-[#0d1a16] tracking-[-0.015em]">
+                  <h3 className="text-[15px] font-semibold text-[#14201c] tracking-[-0.015em]">
                     No verified mentors are available yet for this skill area.
                   </h3>
-                  <p className="mt-1.5 text-sm text-[#51625d] max-w-md mx-auto leading-relaxed">
-                    Skill mentorship in Rubriq is strictly tied to verified institutional records. Students, faculty, and alumni can apply in the "Become a Skill Mentor" tab above to offer guidance.
+                  <p className="mt-1.5 text-sm text-[#697770] max-w-md mx-auto leading-relaxed">
+                    Skill mentorship in Rubriq is strictly tied to verified
+                    institutional records. Students, faculty, and alumni can
+                    apply in the "Become a Skill Mentor" tab above to offer
+                    guidance.
                   </p>
                   <button
                     type="button"
                     onClick={() => setActiveTab("my-profile")}
-                    className="mt-4 inline-flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#0f4a3c] text-white text-xs font-semibold shadow-xs hover:bg-[#0b382d] transition-all cursor-pointer"
+                    className="mt-4 inline-flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#17634e] text-white text-xs font-semibold shadow-xs hover:bg-[#0d3d31] transition-all cursor-pointer"
                   >
                     <span>Become a Skill Mentor</span>
                     <span>→</span>
@@ -668,33 +769,44 @@ export default function CampusNetworkPage() {
                     .toUpperCase();
 
                   // Merge verified badges & skills into a single non-duplicate list
-                  const verifiedSkills = (mentor.verified_badges || []).map((b) => ({
-                    name: b.badge_title.replace(/^Verified\s+/i, "").replace(/\s+Mentor$/i, ""),
-                    isVerified: true,
-                  }));
+                  const verifiedSkills = (mentor.verified_badges || []).map(
+                    (b) => ({
+                      name: b.badge_title
+                        .replace(/^Verified\s+/i, "")
+                        .replace(/\s+Mentor$/i, ""),
+                      isVerified: true,
+                    }),
+                  );
                   const otherSkills = (mentor.skills || [])
-                    .filter((s) => !verifiedSkills.some((v) => v.name.toLowerCase() === s.toLowerCase()))
+                    .filter(
+                      (s) =>
+                        !verifiedSkills.some(
+                          (v) => v.name.toLowerCase() === s.toLowerCase(),
+                        ),
+                    )
                     .map((s) => ({ name: s, isVerified: false }));
                   const allSkills = [...verifiedSkills, ...otherSkills];
 
                   return (
                     <div
                       key={mentor.id}
-                      className="group relative rounded-2xl bg-white border border-[#e4ece8] hover:border-[#0f4a3c]/30 hover:shadow-lg transition-all duration-200 p-5 flex flex-col justify-between"
+                      className="group relative rounded-2xl bg-white border border-[#dfe3de] hover:border-[#17634e]/30 hover:shadow-lg transition-all duration-200 p-5 flex flex-col justify-between"
                     >
                       <div>
                         {/* Match rationale callout if returned by AI matching */}
                         {mentor.match_reason && (
-                          <div className="mb-3 p-2 rounded-xl bg-[#e8f3ef] border border-[#c4ded4] text-[11px] font-semibold text-[#0a382d] flex items-center gap-1.5">
+                          <div className="mb-3 p-2 rounded-xl bg-[#dcebe4] border border-[#cfd6d0] text-[11px] font-semibold text-[#0d3d31] flex items-center gap-1.5">
                             <span>💡</span>
-                            <span className="truncate">{mentor.match_reason}</span>
+                            <span className="truncate">
+                              {mentor.match_reason}
+                            </span>
                           </div>
                         )}
 
                         {/* Profile Header: Circular Avatar + Name + Role */}
                         <div className="flex items-start gap-3">
                           <div className="relative shrink-0">
-                            <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#0f4a3c] to-[#1e7a63] text-white flex items-center justify-center font-bold text-xs tracking-wider shadow-xs ring-2 ring-emerald-100">
+                            <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#17634e] to-[#23765f] text-white flex items-center justify-center font-bold text-xs tracking-wider shadow-xs ring-2 ring-emerald-100">
                               {initials}
                             </div>
                             <span
@@ -705,22 +817,26 @@ export default function CampusNetworkPage() {
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-1">
-                              <h3 className="text-[15px] font-bold text-[#0d1a16] truncate group-hover:text-[#0f4a3c] transition-colors">
+                              <h3 className="text-[15px] font-bold text-[#14201c] truncate group-hover:text-[#17634e] transition-colors">
                                 {mentor.name}
                               </h3>
-                              <span className="shrink-0 text-[10.5px] font-semibold text-[#0f4a3c] bg-[#eef5f2] px-2 py-0.5 rounded-full border border-[#d6e7df]">
+                              <span className="shrink-0 text-[10.5px] font-semibold text-[#17634e] bg-[#dcebe4] px-2 py-0.5 rounded-full border border-[#d6e7df]">
                                 {mentor.role}
                               </span>
                             </div>
-                            <p className="text-xs text-[#627570] truncate mt-0.5">
-                              {mentor.department} {mentor.year_or_batch ? `· ${mentor.year_or_batch}` : ""}
+                            <p className="text-xs text-[#697770] truncate mt-0.5">
+                              {mentor.department}{" "}
+                              {mentor.year_or_batch
+                                ? `· ${mentor.year_or_batch}`
+                                : ""}
                             </p>
                           </div>
                         </div>
 
                         {/* Bio: Exactly 2 lines with fixed height so cards stay aligned */}
                         <p className="mt-3 text-xs text-[#526460] line-clamp-2 leading-relaxed h-[34px]">
-                          {mentor.bio || "Available for technical architecture, projects, and guidance."}
+                          {mentor.bio ||
+                            "Available for technical architecture, projects, and guidance."}
                         </p>
 
                         {/* Unified Top Skills: Single clean row with verified checkmarks */}
@@ -730,16 +846,20 @@ export default function CampusNetworkPage() {
                               key={skill.name}
                               className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
                                 skill.isVerified
-                                  ? "bg-[#e8f3ef] text-[#0a382d] border border-[#c6dfd6]"
-                                  : "bg-[#f4f7f6] text-[#2d3f3a] border border-[#e2e8e5]"
+                                  ? "bg-[#dcebe4] text-[#0d3d31] border border-[#cfd6d0]"
+                                  : "bg-[#f2f3ef] text-[#2d3f3a] border border-[#dfe3de]"
                               }`}
                             >
-                              {skill.isVerified && <span className="text-[#0f4a3c] font-bold">✓</span>}
+                              {skill.isVerified && (
+                                <span className="text-[#17634e] font-bold">
+                                  ✓
+                                </span>
+                              )}
                               <span>{skill.name}</span>
                             </span>
                           ))}
                           {allSkills.length > 3 && (
-                            <span className="shrink-0 text-[10.5px] font-semibold text-[#5a6e68] bg-[#f0f4f2] px-2 py-0.5 rounded-full border border-[#dce6e2]">
+                            <span className="shrink-0 text-[10.5px] font-semibold text-[#5a6e68] bg-[#ecefeb] px-2 py-0.5 rounded-full border border-[#dfe3de]">
                               +{allSkills.length - 3}
                             </span>
                           )}
@@ -751,12 +871,15 @@ export default function CampusNetworkPage() {
                             <button
                               type="button"
                               onClick={() => toggleProjects(mentor.id)}
-                              className="w-full py-1.5 px-3 rounded-xl bg-[#f8faf9] hover:bg-[#eef5f2] border border-[#e2e8e5] text-xs font-semibold text-[#0f4a3c] flex items-center justify-between transition-colors cursor-pointer"
+                              className="w-full py-1.5 px-3 rounded-xl bg-[#f2f3ef] hover:bg-[#dcebe4] border border-[#dfe3de] text-xs font-semibold text-[#17634e] flex items-center justify-between transition-colors cursor-pointer"
                             >
                               <span className="flex items-center gap-1.5 text-[11.5px]">
                                 <span>⚡</span>
                                 <span>
-                                  {mentor.projects.length} Verified {mentor.projects.length === 1 ? "Project" : "Projects"}
+                                  {mentor.projects.length} Verified{" "}
+                                  {mentor.projects.length === 1
+                                    ? "Project"
+                                    : "Projects"}
                                 </span>
                               </span>
                               <span className="text-[11px] text-[#5a6e68] font-normal">
@@ -769,9 +892,11 @@ export default function CampusNetworkPage() {
                                 {mentor.projects.map((p, idx) => (
                                   <div
                                     key={idx}
-                                    className="p-2.5 rounded-xl bg-[#fcfdfd] border border-[#e5eeea] text-xs"
+                                    className="p-2.5 rounded-xl bg-[#fcfdfb] border border-[#dfe3de] text-xs"
                                   >
-                                    <div className="font-semibold text-[#0d1a16]">{p.title}</div>
+                                    <div className="font-semibold text-[#14201c]">
+                                      {p.title}
+                                    </div>
                                     {p.description && (
                                       <p className="mt-0.5 text-[11px] text-[#5a6e68] leading-relaxed line-clamp-2">
                                         {p.description}
@@ -786,12 +911,17 @@ export default function CampusNetworkPage() {
                       </div>
 
                       {/* Footer: Availability & Action Buttons */}
-                      <div className="mt-4 pt-3 border-t border-[#f0f4f2]">
+                      <div className="mt-4 pt-3 border-t border-[#ecefeb]">
                         {/* Micro info row: Availability status + clean links */}
-                        <div className="flex items-center justify-between text-[11px] text-[#627570] mb-3">
-                          <span className="flex items-center gap-1.5 truncate max-w-[170px]" title={mentor.availability || "Open for mentorship"}>
+                        <div className="flex items-center justify-between text-[11px] text-[#697770] mb-3">
+                          <span
+                            className="flex items-center gap-1.5 truncate max-w-[170px]"
+                            title={mentor.availability || "Open for mentorship"}
+                          >
                             <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-                            <span className="truncate">{mentor.availability || "Open to connect"}</span>
+                            <span className="truncate">
+                              {mentor.availability || "Open to connect"}
+                            </span>
                           </span>
 
                           <div className="flex items-center gap-2 shrink-0 font-medium">
@@ -800,7 +930,7 @@ export default function CampusNetworkPage() {
                                 href={mentor.links.linkedin}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-[#0f4a3c] hover:underline"
+                                className="text-[#17634e] hover:underline"
                               >
                                 LinkedIn
                               </a>
@@ -810,7 +940,7 @@ export default function CampusNetworkPage() {
                                 href={mentor.links.github}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-[#0f4a3c] hover:underline"
+                                className="text-[#17634e] hover:underline"
                               >
                                 GitHub
                               </a>
@@ -820,7 +950,7 @@ export default function CampusNetworkPage() {
                                 href={mentor.links.portfolio}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-[#0f4a3c] hover:underline"
+                                className="text-[#17634e] hover:underline"
                               >
                                 Portfolio
                               </a>
@@ -838,7 +968,7 @@ export default function CampusNetworkPage() {
                               setQuestionSuccess(null);
                               setQuestionError(null);
                             }}
-                            className="flex-1 py-2 px-2.5 rounded-xl bg-[#f0f5f3] hover:bg-[#e2ede8] text-[#0f4a3c] text-xs font-semibold transition-all text-center cursor-pointer border border-[#d6e7df]"
+                            className="flex-1 py-2 px-2.5 rounded-xl bg-[#eef6f1] hover:bg-[#e2ede8] text-[#17634e] text-xs font-semibold transition-all text-center cursor-pointer border border-[#d6e7df]"
                           >
                             Ask Question
                           </button>
@@ -846,14 +976,14 @@ export default function CampusNetworkPage() {
                           {mentor.connection_state === "accepted" ? (
                             <Link
                               href="/student/connections"
-                              className="flex-1 py-2 px-2.5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-semibold transition-all text-center cursor-pointer"
+                              className="flex-1 py-2 px-2.5 rounded-xl bg-[#17634e] hover:bg-[#0d3d31] text-white text-xs font-semibold transition-all text-center cursor-pointer"
                             >
                               Chat on Skills →
                             </Link>
                           ) : mentor.connection_state === "pending" ? (
                             <button
                               disabled
-                              className="flex-1 py-2 px-2.5 rounded-xl bg-[#f4f7f6] text-[#71827d] text-xs font-semibold cursor-not-allowed"
+                              className="flex-1 py-2 px-2.5 rounded-xl bg-[#f2f3ef] text-[#8ea29a] text-xs font-semibold cursor-not-allowed"
                             >
                               Pending
                             </button>
@@ -866,7 +996,7 @@ export default function CampusNetworkPage() {
                                 setConnectionSuccess(null);
                                 setConnectionError(null);
                               }}
-                              className="flex-1 py-2 px-2.5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-semibold transition-all text-center shadow-xs cursor-pointer"
+                              className="flex-1 py-2 px-2.5 rounded-xl bg-[#17634e] hover:bg-[#0d3d31] text-white text-xs font-semibold transition-all text-center shadow-xs cursor-pointer"
                             >
                               Request Mentorship
                             </button>
@@ -884,21 +1014,23 @@ export default function CampusNetworkPage() {
         {/* ------------------- TAB 2: BECOME A MENTOR / MY PROFILE ------------------- */}
         {activeTab === "my-profile" && (
           <div className="space-y-8 max-w-3xl">
-            <section className="rounded-3xl bg-white border border-[#d8e2de] p-6 sm:p-8 shadow-xs">
-              <div className="border-b border-[#e8eeec] pb-4 mb-6">
-                <span className="inline-block rounded-full bg-[#e5f0ec] px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-[#0f4a3c]">
+            <section className="rounded-3xl bg-white border border-[#dfe3de] p-6 sm:p-8 shadow-xs">
+              <div className="border-b border-[#dfe3de] pb-4 mb-6">
+                <span className="inline-block rounded-full bg-[#dcebe4] px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-[#17634e]">
                   Mentor Profile Extension
                 </span>
-                <h2 className="mt-2 text-xl font-bold text-[#0d1a16] tracking-[-0.025em]">
+                <h2 className="mt-2 text-xl font-bold text-[#14201c] tracking-[-0.025em]">
                   Share Your Expertise on Campus
                 </h2>
-                <p className="mt-1 text-sm text-[#51625d] leading-relaxed">
-                  Help fellow students navigate courses, research, hackathons, and learning gaps. Create your mentor profile and submit topics for administrative verification.
+                <p className="mt-1 text-sm text-[#697770] leading-relaxed">
+                  Help fellow students navigate courses, research, hackathons,
+                  and learning gaps. Create your mentor profile and submit
+                  topics for administrative verification.
                 </p>
               </div>
 
               {profileSaveSuccess && (
-                <div className="mb-5 p-3.5 rounded-xl bg-[#e5f0ec] text-[#0f4a3c] text-sm font-semibold">
+                <div className="mb-5 p-3.5 rounded-xl bg-[#dcebe4] text-[#17634e] text-sm font-semibold">
                   ✓ Mentor profile saved successfully!
                 </div>
               )}
@@ -906,7 +1038,7 @@ export default function CampusNetworkPage() {
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                    <label className="block text-xs font-semibold text-[#14201c] mb-1">
                       Display Name
                     </label>
                     <input
@@ -915,17 +1047,17 @@ export default function CampusNetworkPage() {
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="e.g. Arjun Sharma"
-                      className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                    <label className="block text-xs font-semibold text-[#14201c] mb-1">
                       Role / Position
                     </label>
                     <select
                       value={displayRole}
                       onChange={(e) => setDisplayRole(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none cursor-pointer"
+                      className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none cursor-pointer"
                     >
                       <option value="Senior Student">Senior Student</option>
                       <option value="Faculty">Faculty</option>
@@ -937,7 +1069,7 @@ export default function CampusNetworkPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                    <label className="block text-xs font-semibold text-[#14201c] mb-1">
                       Department
                     </label>
                     <input
@@ -945,11 +1077,11 @@ export default function CampusNetworkPage() {
                       value={department}
                       onChange={(e) => setDepartment(e.target.value)}
                       placeholder="e.g. Computer Science & Engineering"
-                      className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                    <label className="block text-xs font-semibold text-[#14201c] mb-1">
                       Year / Batch
                     </label>
                     <input
@@ -957,13 +1089,13 @@ export default function CampusNetworkPage() {
                       value={yearOrBatch}
                       onChange={(e) => setYearOrBatch(e.target.value)}
                       placeholder="e.g. 4th Year (2022 - 2026)"
-                      className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                  <label className="block text-xs font-semibold text-[#14201c] mb-1">
                     Bio / Mentoring Philosophy
                   </label>
                   <textarea
@@ -971,12 +1103,12 @@ export default function CampusNetworkPage() {
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Briefly describe how you can help students and what you're passionate about..."
-                    className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                  <label className="block text-xs font-semibold text-[#14201c] mb-1">
                     Skills (comma separated)
                   </label>
                   <input
@@ -984,12 +1116,12 @@ export default function CampusNetworkPage() {
                     value={skillsText}
                     onChange={(e) => setSkillsText(e.target.value)}
                     placeholder="e.g. Python, PyTorch, React, Linear Algebra"
-                    className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                  <label className="block text-xs font-semibold text-[#14201c] mb-1">
                     Mentoring Topics (comma separated)
                   </label>
                   <input
@@ -997,12 +1129,12 @@ export default function CampusNetworkPage() {
                     value={topicsText}
                     onChange={(e) => setTopicsText(e.target.value)}
                     placeholder="e.g. Hackathons, Probability & Bayes Theorem, Research Papers"
-                    className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                  <label className="block text-xs font-semibold text-[#14201c] mb-1">
                     Availability
                   </label>
                   <input
@@ -1010,13 +1142,13 @@ export default function CampusNetworkPage() {
                     value={availability}
                     onChange={(e) => setAvailability(e.target.value)}
                     placeholder="e.g. Weekdays 4-6 PM, Weekends on request"
-                    className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                   />
                 </div>
 
                 {/* Professional Links */}
-                <div className="pt-2 border-t border-[#f0f4f2]">
-                  <span className="block text-xs font-bold uppercase tracking-wider text-[#51625d] mb-2">
+                <div className="pt-2 border-t border-[#ecefeb]">
+                  <span className="block text-xs font-bold uppercase tracking-wider text-[#697770] mb-2">
                     Professional Links (Optional)
                   </span>
                   <div className="grid gap-3 sm:grid-cols-3">
@@ -1025,42 +1157,62 @@ export default function CampusNetworkPage() {
                       value={linkedinUrl}
                       onChange={(e) => setLinkedinUrl(e.target.value)}
                       placeholder="LinkedIn URL"
-                      className="px-3.5 py-2 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-xs focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                      className="px-3.5 py-2 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-xs focus:bg-white focus:border-[#17634e] focus:outline-none"
                     />
                     <input
                       type="url"
                       value={githubUrl}
                       onChange={(e) => setGithubUrl(e.target.value)}
                       placeholder="GitHub URL"
-                      className="px-3.5 py-2 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-xs focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                      className="px-3.5 py-2 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-xs focus:bg-white focus:border-[#17634e] focus:outline-none"
                     />
                     <input
                       type="url"
                       value={portfolioUrl}
                       onChange={(e) => setPortfolioUrl(e.target.value)}
                       placeholder="Portfolio / Website"
-                      className="px-3.5 py-2 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-xs focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                      className="px-3.5 py-2 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-xs focus:bg-white focus:border-[#17634e] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Projects Section */}
-                <div className="pt-3 border-t border-[#f0f4f2]">
-                  <span className="block text-xs font-bold uppercase tracking-wider text-[#51625d] mb-2">
+                <div className="pt-3 border-t border-[#ecefeb]">
+                  <span className="block text-xs font-bold uppercase tracking-wider text-[#697770] mb-2">
                     Featured Projects
                   </span>
                   {projectsList.length > 0 && (
                     <div className="space-y-2 mb-3">
                       {projectsList.map((p, i) => (
-                        <div key={i} className="p-3 rounded-xl bg-[#f8faf9] border border-[#e2e8e5] text-xs flex justify-between items-start">
+                        <div
+                          key={i}
+                          className="p-3 rounded-xl bg-[#f2f3ef] border border-[#dfe3de] text-xs flex justify-between items-start"
+                        >
                           <div>
-                            <span className="font-bold text-[#141f1c]">{p.title}</span>
-                            <p className="text-[#51625d] mt-0.5">{p.description}</p>
-                            {p.link && <a href={p.link} target="_blank" rel="noreferrer" className="text-[#0f4a3c] font-semibold hover:underline mt-1 inline-block">View Link ↗</a>}
+                            <span className="font-bold text-[#14201c]">
+                              {p.title}
+                            </span>
+                            <p className="text-[#697770] mt-0.5">
+                              {p.description}
+                            </p>
+                            {p.link && (
+                              <a
+                                href={p.link}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[#17634e] font-semibold hover:underline mt-1 inline-block"
+                              >
+                                View Link ↗
+                              </a>
+                            )}
                           </div>
                           <button
                             type="button"
-                            onClick={() => setProjectsList((prev) => prev.filter((_, idx) => idx !== i))}
+                            onClick={() =>
+                              setProjectsList((prev) =>
+                                prev.filter((_, idx) => idx !== i),
+                              )
+                            }
                             className="text-red-600 hover:text-red-800 text-xs font-bold ml-2 cursor-pointer"
                           >
                             ✕
@@ -1070,20 +1222,20 @@ export default function CampusNetworkPage() {
                     </div>
                   )}
 
-                  <div className="p-3 rounded-xl bg-[#f8faf9] border border-[#e2e8e5] space-y-2">
+                  <div className="p-3 rounded-xl bg-[#f2f3ef] border border-[#dfe3de] space-y-2">
                     <input
                       type="text"
                       value={projectTitle}
                       onChange={(e) => setProjectTitle(e.target.value)}
                       placeholder="Project title (e.g. Autonomous Drone Perception)"
-                      className="w-full px-3 py-2 bg-white border border-[#d8e2de] rounded-lg text-xs"
+                      className="w-full px-3 py-2 bg-white border border-[#dfe3de] rounded-lg text-xs"
                     />
                     <input
                       type="text"
                       value={projectDesc}
                       onChange={(e) => setProjectDesc(e.target.value)}
                       placeholder="Short description..."
-                      className="w-full px-3 py-2 bg-white border border-[#d8e2de] rounded-lg text-xs"
+                      className="w-full px-3 py-2 bg-white border border-[#dfe3de] rounded-lg text-xs"
                     />
                     <div className="flex items-center gap-2">
                       <input
@@ -1091,12 +1243,12 @@ export default function CampusNetworkPage() {
                         value={projectLink}
                         onChange={(e) => setProjectLink(e.target.value)}
                         placeholder="Link URL (optional)"
-                        className="flex-1 px-3 py-2 bg-white border border-[#d8e2de] rounded-lg text-xs"
+                        className="flex-1 px-3 py-2 bg-white border border-[#dfe3de] rounded-lg text-xs"
                       />
                       <button
                         type="button"
                         onClick={addProject}
-                        className="py-2 px-3 rounded-lg bg-[#0f4a3c] text-white text-xs font-semibold hover:bg-[#0b382d] cursor-pointer"
+                        className="py-2 px-3 rounded-lg bg-[#17634e] text-white text-xs font-semibold hover:bg-[#0d3d31] cursor-pointer"
                       >
                         + Add Project
                       </button>
@@ -1108,35 +1260,39 @@ export default function CampusNetworkPage() {
                   <button
                     type="submit"
                     disabled={profileSaving}
-                    className="w-full py-3 px-6 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-sm font-bold shadow-xs transition-all cursor-pointer disabled:opacity-60"
+                    className="w-full py-3 px-6 rounded-xl bg-[#17634e] hover:bg-[#0d3d31] text-white text-sm font-bold shadow-xs transition-all cursor-pointer disabled:opacity-60"
                   >
-                    {profileSaving ? "Saving Profile..." : "Save Mentor Profile"}
+                    {profileSaving
+                      ? "Saving Profile..."
+                      : "Save Mentor Profile"}
                   </button>
                 </div>
               </form>
             </section>
 
             {/* Apply for Verified Expertise Badges */}
-            <section className="rounded-3xl bg-white border border-[#d8e2de] p-6 sm:p-8 shadow-xs">
-              <div className="border-b border-[#e8eeec] pb-4 mb-6">
-                <span className="inline-block rounded-full bg-[#e5f0ec] px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-[#0f4a3c]">
+            <section className="rounded-3xl bg-white border border-[#dfe3de] p-6 sm:p-8 shadow-xs">
+              <div className="border-b border-[#dfe3de] pb-4 mb-6">
+                <span className="inline-block rounded-full bg-[#dcebe4] px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-[#17634e]">
                   Admin Verified Badges
                 </span>
-                <h2 className="mt-2 text-xl font-bold text-[#0d1a16] tracking-[-0.025em]">
+                <h2 className="mt-2 text-xl font-bold text-[#14201c] tracking-[-0.025em]">
                   Apply for Verified Expertise
                 </h2>
-                <p className="mt-1 text-sm text-[#51625d] leading-relaxed">
-                  Badges are reviewed and approved by Institutional Administrators. Once verified, you will appear in grounded search results for students struggling with these topics.
+                <p className="mt-1 text-sm text-[#697770] leading-relaxed">
+                  Badges are reviewed and approved by Institutional
+                  Administrators. Once verified, you will appear in grounded
+                  search results for students struggling with these topics.
                 </p>
               </div>
 
               {/* Current Expertises Status */}
               <div className="mb-6">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#51625d] mb-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#697770] mb-3">
                   Your Submitted Expertise Topics
                 </h4>
                 {myExpertises.length === 0 ? (
-                  <p className="text-xs text-[#71827d]">
+                  <p className="text-xs text-[#8ea29a]">
                     You have not applied for any verified expertise topics yet.
                   </p>
                 ) : (
@@ -1144,25 +1300,33 @@ export default function CampusNetworkPage() {
                     {myExpertises.map((exp) => (
                       <div
                         key={exp.id}
-                        className="p-3.5 rounded-xl bg-[#f8faf9] border border-[#e2e8e5] flex items-center justify-between gap-3 text-xs"
+                        className="p-3.5 rounded-xl bg-[#f2f3ef] border border-[#dfe3de] flex items-center justify-between gap-3 text-xs"
                       >
                         <div>
-                          <span className="font-bold text-sm text-[#141f1c]">{exp.concept_tag}</span>
-                          <span className="text-[#51625d] block text-[11px]">{exp.category_name}</span>
+                          <span className="font-bold text-sm text-[#14201c]">
+                            {exp.concept_tag}
+                          </span>
+                          <span className="text-[#697770] block text-[11px]">
+                            {exp.category_name}
+                          </span>
                           {exp.review_notes && (
-                            <span className="text-[#9d552d] block text-[11px] mt-0.5">Note: {exp.review_notes}</span>
+                            <span className="text-[#9d552d] block text-[11px] mt-0.5">
+                              Note: {exp.review_notes}
+                            </span>
                           )}
                         </div>
                         <span
                           className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                             exp.status === "verified"
-                              ? "bg-[#e5f0ec] text-[#0f4a3c]"
+                              ? "bg-[#dcebe4] text-[#17634e]"
                               : exp.status === "rejected"
-                              ? "bg-[#fbeeed] text-[#a43838]"
-                              : "bg-[#fff2e7] text-[#9d552d]"
+                                ? "bg-[#fbeeed] text-[#a43838]"
+                                : "bg-[#fff2e7] text-[#9d552d]"
                           }`}
                         >
-                          {exp.status === "verified" ? "✓ Verified" : exp.status}
+                          {exp.status === "verified"
+                            ? "✓ Verified"
+                            : exp.status}
                         </span>
                       </div>
                     ))}
@@ -1171,7 +1335,7 @@ export default function CampusNetworkPage() {
               </div>
 
               {applySuccess && (
-                <div className="mb-4 p-3 rounded-xl bg-[#e5f0ec] text-[#0f4a3c] text-xs font-semibold">
+                <div className="mb-4 p-3 rounded-xl bg-[#dcebe4] text-[#17634e] text-xs font-semibold">
                   ✓ {applySuccess}
                 </div>
               )}
@@ -1181,17 +1345,20 @@ export default function CampusNetworkPage() {
                 </div>
               )}
 
-              <form onSubmit={handleApplyExpertise} className="space-y-3.5 pt-2">
+              <form
+                onSubmit={handleApplyExpertise}
+                className="space-y-3.5 pt-2"
+              >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                    <label className="block text-xs font-semibold text-[#14201c] mb-1">
                       Expertise Category
                     </label>
                     <select
                       required
                       value={applyCategory}
                       onChange={(e) => setApplyCategory(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-xs focus:bg-white focus:border-[#0f4a3c] focus:outline-none cursor-pointer"
+                      className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-xs focus:bg-white focus:border-[#17634e] focus:outline-none cursor-pointer"
                     >
                       <option value="">Select Category...</option>
                       {categories.map((c) => (
@@ -1202,7 +1369,7 @@ export default function CampusNetworkPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                    <label className="block text-xs font-semibold text-[#14201c] mb-1">
                       Specific Concept / Topic Tag
                     </label>
                     <input
@@ -1211,7 +1378,7 @@ export default function CampusNetworkPage() {
                       value={applyConcept}
                       onChange={(e) => setApplyConcept(e.target.value)}
                       placeholder="e.g. Probability, Computer Vision, React"
-                      className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-xs focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-xs focus:bg-white focus:border-[#17634e] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1219,9 +1386,11 @@ export default function CampusNetworkPage() {
                 <button
                   type="submit"
                   disabled={applyingExpertise}
-                  className="py-2.5 px-5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-60"
+                  className="py-2.5 px-5 rounded-xl bg-[#17634e] hover:bg-[#0d3d31] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-60"
                 >
-                  {applyingExpertise ? "Submitting..." : "Submit for Admin Verification →"}
+                  {applyingExpertise
+                    ? "Submitting..."
+                    : "Submit for Admin Verification →"}
                 </button>
               </form>
             </section>
@@ -1232,13 +1401,13 @@ export default function CampusNetworkPage() {
       {/* ------------------- MODAL: REQUEST CONNECTION ------------------- */}
       {targetMentorForConnection && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-[#d8e2de] animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-[#e8eeec]">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-[#dfe3de] animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dfe3de]">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#0f4a3c]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#17634e]">
                   Practical Skill Mentorship
                 </span>
-                <h3 className="text-lg font-bold text-[#0d1a16] tracking-[-0.02em]">
+                <h3 className="text-lg font-bold text-[#14201c] tracking-[-0.02em]">
                   Connect with {targetMentorForConnection.name}
                 </h3>
               </div>
@@ -1252,7 +1421,7 @@ export default function CampusNetworkPage() {
             </div>
 
             {connectionSuccess && (
-              <div className="mt-4 p-3 rounded-xl bg-[#e5f0ec] text-[#0f4a3c] text-xs font-semibold">
+              <div className="mt-4 p-3 rounded-xl bg-[#dcebe4] text-[#17634e] text-xs font-semibold">
                 ✓ {connectionSuccess}
               </div>
             )}
@@ -1265,7 +1434,7 @@ export default function CampusNetworkPage() {
             {!connectionSuccess && (
               <div className="mt-4 space-y-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                  <label className="block text-xs font-semibold text-[#14201c] mb-1">
                     Related Skill or Project Focus (optional)
                   </label>
                   <input
@@ -1273,12 +1442,12 @@ export default function CampusNetworkPage() {
                     value={connectionConcept}
                     onChange={(e) => setConnectionConcept(e.target.value)}
                     placeholder="e.g. Next.js Architecture, PyTorch Computer Vision, Hackathon Project"
-                    className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-xs focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-xs focus:bg-white focus:border-[#17634e] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                  <label className="block text-xs font-semibold text-[#14201c] mb-1">
                     Introduction & Project Goal
                   </label>
                   <textarea
@@ -1286,7 +1455,7 @@ export default function CampusNetworkPage() {
                     value={connectionNote}
                     onChange={(e) => setConnectionNote(e.target.value)}
                     placeholder="Describe what skill or project you want to build, or what technical challenge you'd like mentorship on..."
-                    className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-xs focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-xs focus:bg-white focus:border-[#17634e] focus:outline-none"
                   />
                 </div>
 
@@ -1294,7 +1463,7 @@ export default function CampusNetworkPage() {
                   <button
                     type="button"
                     onClick={() => setTargetMentorForConnection(null)}
-                    className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[#51625d] hover:bg-[#f4f7f6] cursor-pointer"
+                    className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[#697770] hover:bg-[#f2f3ef] cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -1302,9 +1471,11 @@ export default function CampusNetworkPage() {
                     type="button"
                     disabled={sendingConnection}
                     onClick={handleSendConnection}
-                    className="py-2.5 px-5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-60"
+                    className="py-2.5 px-5 rounded-xl bg-[#17634e] hover:bg-[#0d3d31] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-60"
                   >
-                    {sendingConnection ? "Sending..." : "Send Mentorship Request"}
+                    {sendingConnection
+                      ? "Sending..."
+                      : "Send Mentorship Request"}
                   </button>
                 </div>
               </div>
@@ -1316,13 +1487,13 @@ export default function CampusNetworkPage() {
       {/* ------------------- MODAL: ASK QUESTION (3 MODES) ------------------- */}
       {targetMentorForQuestion && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-[#d8e2de] animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-[#e8eeec]">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-[#dfe3de] animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dfe3de]">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#0f4a3c]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#17634e]">
                   Direct Practical Skill Guidance
                 </span>
-                <h3 className="text-lg font-bold text-[#0d1a16] tracking-[-0.02em]">
+                <h3 className="text-lg font-bold text-[#14201c] tracking-[-0.02em]">
                   Ask {targetMentorForQuestion.name}
                 </h3>
               </div>
@@ -1336,7 +1507,7 @@ export default function CampusNetworkPage() {
             </div>
 
             {questionSuccess && (
-              <div className="mt-4 p-3 rounded-xl bg-[#e5f0ec] text-[#0f4a3c] text-xs font-semibold">
+              <div className="mt-4 p-3 rounded-xl bg-[#dcebe4] text-[#17634e] text-xs font-semibold">
                 ✓ {questionSuccess}
               </div>
             )}
@@ -1350,7 +1521,7 @@ export default function CampusNetworkPage() {
               <form onSubmit={handlePostQuestion} className="mt-4 space-y-4">
                 {/* 3 Question Modes Selection */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#51625d] mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#697770] mb-2">
                     Privacy Mode
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -1359,47 +1530,55 @@ export default function CampusNetworkPage() {
                       onClick={() => setQuestionMode("anonymous")}
                       className={`p-2.5 rounded-xl text-center border transition-all cursor-pointer ${
                         questionMode === "anonymous"
-                          ? "border-[#0f4a3c] bg-[#e5f0ec] text-[#0f4a3c] font-bold"
-                          : "border-[#d8e2de] bg-[#f8faf9] text-[#51625d]"
+                          ? "border-[#17634e] bg-[#dcebe4] text-[#17634e] font-bold"
+                          : "border-[#dfe3de] bg-[#f2f3ef] text-[#697770]"
                       }`}
                     >
                       <div className="text-xs font-bold">Anonymous</div>
-                      <div className="text-[10px] opacity-75">Identity hidden</div>
+                      <div className="text-[10px] opacity-75">
+                        Identity hidden
+                      </div>
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuestionMode("public")}
                       className={`p-2.5 rounded-xl text-center border transition-all cursor-pointer ${
                         questionMode === "public"
-                          ? "border-[#0f4a3c] bg-[#e5f0ec] text-[#0f4a3c] font-bold"
-                          : "border-[#d8e2de] bg-[#f8faf9] text-[#51625d]"
+                          ? "border-[#17634e] bg-[#dcebe4] text-[#17634e] font-bold"
+                          : "border-[#dfe3de] bg-[#f2f3ef] text-[#697770]"
                       }`}
                     >
                       <div className="text-xs font-bold">Show My Name</div>
-                      <div className="text-[10px] opacity-75">Public profile</div>
+                      <div className="text-[10px] opacity-75">
+                        Public profile
+                      </div>
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuestionMode("private")}
                       className={`p-2.5 rounded-xl text-center border transition-all cursor-pointer ${
                         questionMode === "private"
-                          ? "border-[#0f4a3c] bg-[#e5f0ec] text-[#0f4a3c] font-bold"
-                          : "border-[#d8e2de] bg-[#f8faf9] text-[#51625d]"
+                          ? "border-[#17634e] bg-[#dcebe4] text-[#17634e] font-bold"
+                          : "border-[#dfe3de] bg-[#f2f3ef] text-[#697770]"
                       }`}
                     >
                       <div className="text-xs font-bold">Private Request</div>
-                      <div className="text-[10px] opacity-75">Only mentor & you</div>
+                      <div className="text-[10px] opacity-75">
+                        Only mentor & you
+                      </div>
                     </button>
                   </div>
                   {questionMode === "anonymous" && (
-                    <p className="mt-1.5 text-[11px] text-[#71827d]">
-                      Your identity will be displayed as "Anonymous Student" to peers and mentors. Backend retains authentic audit identity for security.
+                    <p className="mt-1.5 text-[11px] text-[#8ea29a]">
+                      Your identity will be displayed as "Anonymous Student" to
+                      peers and mentors. Backend retains authentic audit
+                      identity for security.
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                  <label className="block text-xs font-semibold text-[#14201c] mb-1">
                     Skill Question Title
                   </label>
                   <input
@@ -1408,12 +1587,12 @@ export default function CampusNetworkPage() {
                     value={questionTitle}
                     onChange={(e) => setQuestionTitle(e.target.value)}
                     placeholder="e.g. How do I optimize inference latency for PyTorch models?"
-                    className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                  <label className="block text-xs font-semibold text-[#14201c] mb-1">
                     Technical Details & Context
                   </label>
                   <textarea
@@ -1422,7 +1601,7 @@ export default function CampusNetworkPage() {
                     value={questionBody}
                     onChange={(e) => setQuestionBody(e.target.value)}
                     placeholder="Provide details on your tech stack, architecture, code snippets, or what you've tried so far..."
-                    className="w-full px-3.5 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-sm focus:bg-white focus:border-[#17634e] focus:outline-none"
                   />
                 </div>
 
@@ -1430,14 +1609,14 @@ export default function CampusNetworkPage() {
                   <button
                     type="button"
                     onClick={() => setTargetMentorForQuestion(null)}
-                    className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[#51625d] hover:bg-[#f4f7f6] cursor-pointer"
+                    className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[#697770] hover:bg-[#f2f3ef] cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submittingQuestion}
-                    className="py-2.5 px-5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-60"
+                    className="py-2.5 px-5 rounded-xl bg-[#17634e] hover:bg-[#0d3d31] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-60"
                   >
                     {submittingQuestion ? "Posting..." : "Post Skill Question"}
                   </button>

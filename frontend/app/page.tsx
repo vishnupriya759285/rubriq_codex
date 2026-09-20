@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { api } from "@/lib/api";
 
@@ -45,6 +45,22 @@ function statusClass(status: string) {
   return "status-success";
 }
 
+function ArrowIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 10h12M11 5l5 5-5 5" />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState("");
@@ -55,162 +71,245 @@ export default function Home() {
       .catch(() => setError("Sign in to load your workspace."));
   }, []);
   const metrics = data?.metrics;
+  const completion = metrics?.total_papers
+    ? Math.round((metrics.completed_papers / metrics.total_papers) * 100)
+    : 0;
+
   return (
     <AppShell
       actions={
         <Link href="/exams/new" className="button-primary">
-          Create exam
+          <span className="button-plus">+</span> Create assessment
         </Link>
       }
     >
-      <section id="workspace" className="mx-auto max-w-7xl page-enter">
-        <div className="mb-8 flex flex-col justify-between gap-5 border-b border-[var(--line)] pb-7 lg:flex-row lg:items-end">
+      <section id="workspace" className="dashboard-page">
+        <div className="dashboard-heading">
           <div>
-            <h1 className="text-4xl font-semibold tracking-[-0.035em]">
-              Assessment review
-            </h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--ink-muted)]">
-              Open a paper to inspect its original evidence, confirm a current
-              mark, or make a teacher override.
+            <span className="eyebrow">Assessment intelligence</span>
+            <h1>Your grading command center.</h1>
+            <p>
+              One clear view of progress, evidence quality, and the decisions
+              that need your attention.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="dashboard-actions">
             <Link href="/assistant" className="button-secondary">
               Ask about class evidence
             </Link>
             <Link href="/exams" className="button-quiet">
-              View all exams
+              View assessments <ArrowIcon />
             </Link>
           </div>
         </div>
+
         {error && (
-          <p
-            role="alert"
-            className="mb-5 rounded-lg bg-[var(--review-soft)] p-4 text-sm text-[var(--review)]"
-          >
-            {error}{" "}
-            <Link
-              href="/login"
-              className="font-medium underline underline-offset-2"
-            >
-              Open sign in
-            </Link>
+          <p role="alert" className="alert-banner">
+            {error} <Link href="/login">Open sign in</Link>
           </p>
         )}
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+
+        <section className="command-hero">
+          <div className="command-glow" />
+          <div className="command-copy">
+            <span className="live-label">
+              <i /> Live assessment pulse
+            </span>
+            <h2>
+              {metrics
+                ? metrics.required_reviews > 0
+                  ? `${metrics.required_reviews} decisions need your expertise.`
+                  : "Your review queue is under control."
+                : "Building your assessment pulse..."}
+            </h2>
+            <p>
+              Rubriq has processed {metrics?.total_papers ?? "—"} papers while
+              keeping every score connected to its source evidence.
+            </p>
+            <div className="command-actions">
+              <Link href="/submissions" className="hero-button">
+                Open review queue <ArrowIcon />
+              </Link>
+              <Link href="/exams/new" className="hero-link">
+                Create assessment <span>+</span>
+              </Link>
+            </div>
+          </div>
+          <div className="command-visual">
+            <div
+              className="completion-ring"
+              style={
+                { "--progress": `${completion * 3.6}deg` } as CSSProperties
+              }
+            >
+              <div>
+                <strong>{completion}%</strong>
+                <span>complete</span>
+              </div>
+            </div>
+            <div className="hero-stat-stack">
+              <div>
+                <span>In progress</span>
+                <strong>{metrics?.in_progress_papers ?? "—"}</strong>
+              </div>
+              <div>
+                <span>Class average</span>
+                <strong>
+                  {metrics ? `${metrics.average_percentage}%` : "—"}
+                </strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="metrics-grid">
           <Metric
             label="Active assessments"
-            value={metrics ? String(metrics.active_exams) : "-"}
-            note="Available for marking"
+            value={metrics ? String(metrics.active_exams) : "—"}
+            note="Ready for marking"
+            icon="document"
           />
           <Metric
             label="Papers completed"
             value={
               metrics
                 ? `${metrics.completed_papers}/${metrics.total_papers}`
-                : "-"
+                : "—"
             }
             note={
               metrics
-                ? `${metrics.in_progress_papers} in progress`
+                ? `${metrics.in_progress_papers} currently processing`
                 : "Loading workspace"
             }
+            icon="check"
+            progress={completion}
           />
           <Metric
             label="Class average"
-            value={metrics ? `${metrics.average_percentage}%` : "-"}
+            value={metrics ? `${metrics.average_percentage}%` : "—"}
             note="Across evaluated papers"
+            icon="chart"
           />
           <Metric
-            label="Review required"
-            value={metrics ? String(metrics.required_reviews) : "-"}
-            note="Evidence cannot support a mark"
-            tone="danger"
-          />
-          <Metric
-            label="Review recommended"
-            value={metrics ? String(metrics.recommended_reviews) : "-"}
-            note="Optional teacher check"
-            tone="review"
+            label="Needs attention"
+            value={
+              metrics
+                ? String(metrics.required_reviews + metrics.recommended_reviews)
+                : "—"
+            }
+            note={
+              metrics
+                ? `${metrics.required_reviews} required · ${metrics.recommended_reviews} suggested`
+                : "Teacher review queue"
+            }
+            icon="flag"
+            tone={metrics?.required_reviews ? "danger" : "review"}
           />
         </div>
-        <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,.85fr)]">
-          <section className="surface-lined overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
-              <h2 className="text-2xl font-semibold">Papers to review</h2>
-              <Link href="/submissions" className="button-quiet">
-                All papers
+
+        <div className="dashboard-columns">
+          <section className="panel review-panel">
+            <div className="panel-header">
+              <div>
+                <span className="section-kicker">Priority queue</span>
+                <h2>Papers to review</h2>
+              </div>
+              <Link href="/submissions" className="text-link">
+                View all <ArrowIcon />
               </Link>
             </div>
-            <div className="divide-y divide-[var(--line)]">
-              {data?.review_papers.map((item) => (
-                <Link key={item.id} href={`/submissions/${item.id}`} className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-[var(--surface-muted)]">
-                  <span className="min-w-0"><strong className="block truncate">{item.student_name} · {item.exam_title}</strong><span className="mt-1 block text-sm text-[var(--review)]">{item.reason}</span></span>
-                  <span className="shrink-0 text-right font-mono text-sm">{item.total_score.toFixed(1)}/{item.total_marks}</span>
+            <div className="panel-list">
+              {data?.review_papers.map((item, index) => (
+                <Link
+                  key={item.id}
+                  href={`/submissions/${item.id}`}
+                  className="review-row"
+                >
+                  <span className="review-index">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="review-copy">
+                    <strong>{item.student_name}</strong>
+                    <span>{item.exam_title}</span>
+                    <em>{item.reason || "Teacher check recommended"}</em>
+                  </span>
+                  <span className="review-score">
+                    <strong>
+                      {item.total_score.toFixed(1)}
+                      <small>/{item.total_marks}</small>
+                    </strong>
+                    <span>Review paper</span>
+                  </span>
+                  <span className="row-arrow">
+                    <ArrowIcon />
+                  </span>
                 </Link>
               ))}
               {data && data.review_papers.length === 0 && (
-                <p className="p-5 text-sm text-[var(--ink-muted)]">
-                  No papers currently need teacher attention.
-                </p>
+                <EmptyState
+                  title="Review queue cleared"
+                  text="No papers currently need teacher attention."
+                />
               )}
-              {!data && (
-                <p className="p-5 text-sm text-[var(--ink-muted)]">
-                  Loading papers that need review...
-                </p>
-              )}
+              {!data && <LoadingRows count={3} />}
             </div>
           </section>
-          <section id="papers" className="min-w-0">
-            <div className="mb-3 flex items-baseline justify-between">
-              <h2 className="text-2xl font-semibold tracking-[-0.02em]">
-                Recent papers
-              </h2>
-              <Link href="/submissions" className="button-quiet">
-                View all
+
+          <section className="panel recent-panel">
+            <div className="panel-header">
+              <div>
+                <span className="section-kicker">Latest activity</span>
+                <h2>Recent papers</h2>
+              </div>
+              <Link href="/submissions" className="text-link">
+                View all <ArrowIcon />
               </Link>
             </div>
-            <div className="surface-lined overflow-hidden">
-            {data?.submissions.map((item) => (
-              <Link
-                key={item.id}
-                href={`/submissions/${item.id}`}
-                className="flex items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-4 transition-colors duration-150 last:border-0 hover:bg-[var(--surface-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand)]"
-              >
-                <span className="min-w-0">
-                  <strong className="block truncate text-sm font-semibold">
-                    {item.student_name}
-                  </strong>
-                  <span className="block truncate text-sm text-[var(--ink-muted)]">
-                    {item.exam_title}
-                  </span>
-                </span>
-                <span className="shrink-0 text-right">
-                  <strong className="block font-mono text-sm">
-                      {item.total_score.toFixed(1)}/{item.total_marks}
-                  </strong>
-                  <span
-                    className={`status-pill mt-1 ${statusClass(item.status)}`}
+            <div className="panel-list compact-list">
+              {data?.submissions.slice(0, 6).map((item) => {
+                const initials = item.student_name
+                  .split(" ")
+                  .slice(0, 2)
+                  .map((part) => part[0])
+                  .join("")
+                  .toUpperCase();
+                return (
+                  <Link
+                    key={item.id}
+                    href={`/submissions/${item.id}`}
+                    className="paper-row"
                   >
-                    {item.status.replaceAll("_", " ")}
-                  </span>
-                </span>
-              </Link>
-            ))}
-            {!data && (
-              <div className="p-5 text-sm text-[var(--ink-muted)]">
-                Loading assessment records...
-              </div>
-            )}
-            {data?.submissions.length === 0 && (
-              <div className="p-5 text-sm text-[var(--ink-muted)]">
-                Upload a paper to begin the evidence trail.
-              </div>
-            )}
+                    <span className="student-avatar">{initials}</span>
+                    <span className="paper-copy">
+                      <strong>{item.student_name}</strong>
+                      <span>{item.exam_title}</span>
+                    </span>
+                    <span className="paper-meta">
+                      <strong>
+                        {item.total_score.toFixed(1)}/{item.total_marks}
+                      </strong>
+                      <span
+                        className={`status-pill ${statusClass(item.status)}`}
+                      >
+                        {item.status.replaceAll("_", " ")}
+                      </span>
+                    </span>
+                  </Link>
+                );
+              })}
+              {!data && <LoadingRows count={4} />}
+              {data?.submissions.length === 0 && (
+                <EmptyState
+                  title="No papers yet"
+                  text="Upload a paper to begin its evidence trail."
+                />
+              )}
             </div>
             {metrics && metrics.failed_papers > 0 && (
-              <p className="mt-3 text-sm text-[var(--review)]">
-                {metrics.failed_papers} paper{metrics.failed_papers === 1 ? "" : "s"} need processing attention.
+              <p className="panel-warning">
+                {metrics.failed_papers} paper
+                {metrics.failed_papers === 1 ? "" : "s"} need processing
+                attention.
               </p>
             )}
           </section>
@@ -224,30 +323,102 @@ function Metric({
   label,
   value,
   note,
+  icon,
   tone,
+  progress,
 }: {
   label: string;
   value: string;
   note: string;
+  icon: "document" | "check" | "chart" | "flag";
   tone?: "danger" | "review";
+  progress?: number;
 }) {
-  const color =
-    tone === "danger"
-      ? "text-[var(--danger)]"
-      : tone === "review"
-        ? "text-[var(--review)]"
-        : "";
+  const icons: Record<string, ReactNode> = {
+    document: (
+      <>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+        <path d="M14 2v6h6M8 13h8M8 17h5" />
+      </>
+    ),
+    check: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="m8 12 2.5 2.5L16 9" />
+      </>
+    ),
+    chart: (
+      <>
+        <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
+      </>
+    ),
+    flag: (
+      <>
+        <path d="M5 21V4M5 5h11l-1 4 1 4H5" />
+      </>
+    ),
+  };
   return (
-    <div className="surface p-5">
-      <p className="truncate text-sm font-medium text-[var(--ink-muted)]">
-        {label}
-      </p>
-      <p
-        className={`my-1 text-3xl font-semibold tracking-[-0.03em] ${color}`}
-      >
-        {value}
-      </p>
-      <p className="text-sm text-[var(--ink-muted)]">{note}</p>
+    <article className={`metric-card ${tone ? `metric-${tone}` : ""}`}>
+      <div className="metric-top">
+        <span>{label}</span>
+        <span className="metric-icon">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {icons[icon]}
+          </svg>
+        </span>
+      </div>
+      <strong className="metric-value">{value}</strong>
+      <p>{note}</p>
+      {progress !== undefined && (
+        <div
+          className="metric-progress"
+          role="progressbar"
+          aria-label="Papers completed"
+          aria-valuenow={progress}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <span style={{ width: `${progress}%` }} />
+        </div>
+      )}
+    </article>
+  );
+}
+
+function LoadingRows({ count }: { count: number }) {
+  const keys = ["first", "second", "third", "fourth", "fifth", "sixth"];
+  return (
+    <>
+      {keys.slice(0, count).map((key) => (
+        <div className="loading-row" key={key}>
+          <span />
+          <div>
+            <span />
+            <span />
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function EmptyState({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="empty-state">
+      <span>✓</span>
+      <div>
+        <strong>{title}</strong>
+        <p>{text}</p>
+      </div>
     </div>
   );
 }

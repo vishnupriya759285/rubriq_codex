@@ -36,9 +36,7 @@ export default function SubmissionsPage() {
     <AppShell>
       <section className="mx-auto max-w-6xl">
         <div className="mb-8 border-b border-[var(--line)] pb-7">
-          <h1 className="text-4xl font-semibold tracking-[-0.035em]">
-            Papers
-          </h1>
+          <h1 className="text-4xl font-semibold tracking-[-0.035em]">Papers</h1>
           <p className="mt-2 text-sm text-[var(--ink-muted)]">
             Every submitted original remains available for evidence review.
           </p>
@@ -70,7 +68,9 @@ export default function SubmissionsPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="font-mono text-sm">{row.total_score}/{row.total_marks}</span>
+                <span className="font-mono text-sm">
+                  {row.total_score}/{row.total_marks}
+                </span>
                 <Link
                   href={`/submissions/${row.id}`}
                   className="button-secondary"

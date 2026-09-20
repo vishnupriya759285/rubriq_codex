@@ -186,21 +186,48 @@ export default function NewExamPage() {
   async function importAnswerKey(file: File | undefined) {
     if (!file) return;
     if (!questions.every((question) => question.number.trim())) {
-      setImportError("Add a number to every question before importing an answer key.");
+      setImportError(
+        "Add a number to every question before importing an answer key.",
+      );
       return;
     }
     setImportError("");
     setImporting(true);
     const form = new FormData();
     form.set("file", file);
-    form.set("question_numbers", JSON.stringify(questions.map((question) => question.number)));
+    form.set(
+      "question_numbers",
+      JSON.stringify(questions.map((question) => question.number)),
+    );
     try {
-      const result = await api.request<{ answers: { question_number: string; answer_key: string }[]; warnings: string[] }>("/api/answer-keys/import", { method: "POST", body: form });
-      const imported = new Map(result.answers.map((answer) => [answer.question_number.trim().toUpperCase(), answer.answer_key]));
-      setQuestions((items) => items.map((question) => ({ ...question, answer_key: imported.get(question.number.trim().toUpperCase()) ?? question.answer_key })));
-      setImportWarnings((warnings) => [...warnings, ...(result.warnings ?? [])]);
+      const result = await api.request<{
+        answers: { question_number: string; answer_key: string }[];
+        warnings: string[];
+      }>("/api/answer-keys/import", { method: "POST", body: form });
+      const imported = new Map(
+        result.answers.map((answer) => [
+          answer.question_number.trim().toUpperCase(),
+          answer.answer_key,
+        ]),
+      );
+      setQuestions((items) =>
+        items.map((question) => ({
+          ...question,
+          answer_key:
+            imported.get(question.number.trim().toUpperCase()) ??
+            question.answer_key,
+        })),
+      );
+      setImportWarnings((warnings) => [
+        ...warnings,
+        ...(result.warnings ?? []),
+      ]);
     } catch (reason) {
-      setImportError(reason instanceof Error ? reason.message : "The answer key could not be imported.");
+      setImportError(
+        reason instanceof Error
+          ? reason.message
+          : "The answer key could not be imported.",
+      );
     } finally {
       setImporting(false);
     }
@@ -270,18 +297,16 @@ export default function NewExamPage() {
 
   if (createdId)
     return (
-      <main className="min-h-screen bg-[#f5f1e9] px-5 py-12 text-[#172126] sm:px-8">
-        <div className="mx-auto max-w-xl rounded-lg border border-[#173f4c]/15 bg-[#fcfaf5] p-8">
+      <main className="min-h-screen bg-[#f2f3ef] px-5 py-12 text-[#14201c] sm:px-8">
+        <div className="mx-auto max-w-xl rounded-lg border border-[#17634e]/15 bg-[#fcfdfb] p-8">
           <p className="text-sm font-medium text-[#52705b]">Exam saved</p>
-          <h1 className="mt-2 text-3xl font-semibold">
-            Your rubric is ready.
-          </h1>
-          <p className="mt-3 text-[#566164]">
+          <h1 className="mt-2 text-3xl font-semibold">Your rubric is ready.</h1>
+          <p className="mt-3 text-[#697770]">
             Rubriq will use these criteria as the source of truth when student
             papers are uploaded.
           </p>
           <Link
-            className="mt-6 inline-block rounded-md bg-[#173f4c] px-4 py-2 text-sm font-medium text-white"
+            className="mt-6 inline-block rounded-md bg-[#17634e] px-4 py-2 text-sm font-medium text-white"
             href={`/exams/${createdId}`}
           >
             View exam
@@ -360,10 +385,23 @@ export default function NewExamPage() {
         </section>
         <section className="surface-lined mb-6 p-5">
           <h2 className="text-2xl font-semibold">Optional answer key</h2>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--ink-muted)]">Upload a marking scheme to fill the per-question reference answers below. Rubriq accepts equivalent student wording and uses the rubric as the scoring authority.</p>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--ink-muted)]">
+            Upload a marking scheme to fill the per-question reference answers
+            below. Rubriq accepts equivalent student wording and uses the rubric
+            as the scoring authority.
+          </p>
           <label className="button-secondary mt-4 cursor-pointer">
             {importing ? "Reading answer key..." : "Upload answer key"}
-            <input className="sr-only" type="file" accept="image/jpeg,image/png,application/pdf" disabled={importing} onChange={(event) => { void importAnswerKey(event.target.files?.[0]); event.target.value = ""; }} />
+            <input
+              className="sr-only"
+              type="file"
+              accept="image/jpeg,image/png,application/pdf"
+              disabled={importing}
+              onChange={(event) => {
+                void importAnswerKey(event.target.files?.[0]);
+                event.target.value = "";
+              }}
+            />
           </label>
         </section>
         <section className="surface mb-6 grid gap-4 p-5 sm:grid-cols-3">
@@ -537,19 +575,25 @@ export default function NewExamPage() {
                     Remove
                   </button>
                 </div>
-               </div>
-               <Field label="Reference answer (optional)">
-                 <textarea
-                   name={`question-answer-key-${questionIndex}`}
-                   value={question.answer_key}
-                   onChange={(event) => updateQuestion(questionIndex, "answer_key", event.target.value)}
-                   className="input min-h-24"
-                   placeholder="An acceptable answer or method. Equivalent student wording is accepted."
-                 />
-               </Field>
-               <div className="overflow-x-auto">
+              </div>
+              <Field label="Reference answer (optional)">
+                <textarea
+                  name={`question-answer-key-${questionIndex}`}
+                  value={question.answer_key}
+                  onChange={(event) =>
+                    updateQuestion(
+                      questionIndex,
+                      "answer_key",
+                      event.target.value,
+                    )
+                  }
+                  className="input min-h-24"
+                  placeholder="An acceptable answer or method. Equivalent student wording is accepted."
+                />
+              </Field>
+              <div className="overflow-x-auto">
                 <table className="w-full min-w-[650px] text-left text-sm">
-                  <thead className="border-b border-[#172126]/10 text-[#667174]">
+                  <thead className="border-b border-[#14201c]/10 text-[#667174]">
                     <tr>
                       <th className="pb-2 font-medium">Criterion</th>
                       <th className="pb-2 font-medium">Description</th>
@@ -562,7 +606,7 @@ export default function NewExamPage() {
                     {question.criteria.map((criterion, criterionIndex) => (
                       <tr
                         key={criterion.title}
-                        className="border-b border-[#172126]/8 last:border-0"
+                        className="border-b border-[#14201c]/8 last:border-0"
                       >
                         <td className="py-2 pr-2">
                           <input
@@ -706,7 +750,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-1 text-sm font-medium text-[#566164]">
+    <div className="grid gap-1 text-sm font-medium text-[#697770]">
       <span>{label}</span>
       {children}
     </div>

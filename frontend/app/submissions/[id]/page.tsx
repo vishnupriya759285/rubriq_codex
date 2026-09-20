@@ -74,13 +74,13 @@ export default function SubmissionPage({
 
   if (error)
     return (
-      <main className="min-h-screen bg-[#f5f1e9] p-8 text-[#172126]">
+      <main className="min-h-screen bg-[#f2f3ef] p-8 text-[#14201c]">
         {error}
       </main>
     );
   if (!submission)
     return (
-      <main className="min-h-screen bg-[#f5f1e9] p-8 text-[#566164]">
+      <main className="min-h-screen bg-[#f2f3ef] p-8 text-[#697770]">
         Loading assessment...
       </main>
     );
@@ -108,7 +108,7 @@ export default function SubmissionPage({
     const response = await fetch(`${API}/evaluations/${selected.id}`, {
       method: "PATCH",
       credentials: "include",
-        headers: { "Content-Type": "application/json", ...csrfHeaders() },
+      headers: { "Content-Type": "application/json", ...csrfHeaders() },
       body: JSON.stringify({
         marks: Number(overrideMarks),
         reason: overrideReason || null,
@@ -135,7 +135,7 @@ export default function SubmissionPage({
     const response = await fetch(`${API}/evaluations/${selected.id}/review`, {
       method: "POST",
       credentials: "include",
-        headers: { "Content-Type": "application/json", ...csrfHeaders() },
+      headers: { "Content-Type": "application/json", ...csrfHeaders() },
       body: JSON.stringify({ comment: challenge }),
     });
     if (response.ok) {
@@ -169,7 +169,7 @@ export default function SubmissionPage({
     setSaving(true);
     const response = await fetch(
       `${API}/evaluations/${selected.id}/complete-review`,
-        { method: "POST", credentials: "include", headers: csrfHeaders() },
+      { method: "POST", credentials: "include", headers: csrfHeaders() },
     );
     if (response.ok) {
       const data = await (
@@ -221,10 +221,16 @@ export default function SubmissionPage({
   async function setReleased(released: boolean) {
     setSaving(true);
     try {
-      await api.patch(`/api/submissions/${submission.id}/release`, { released });
+      await api.patch(`/api/submissions/${submission.id}/release`, {
+        released,
+      });
       setSubmission(await api.get(`/api/submissions/${submission.id}`));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "The release status could not be updated.");
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "The release status could not be updated.",
+      );
     } finally {
       setSaving(false);
     }
@@ -237,8 +243,14 @@ export default function SubmissionPage({
           <button
             type="button"
             onClick={() => void setReleased(!submission.released_at)}
-            disabled={saving || (!submission.released_at && !["completed", "review_required"].includes(submission.status))}
-            className={submission.released_at ? "button-secondary" : "button-primary"}
+            disabled={
+              saving ||
+              (!submission.released_at &&
+                !["completed", "review_required"].includes(submission.status))
+            }
+            className={
+              submission.released_at ? "button-secondary" : "button-primary"
+            }
           >
             {submission.released_at ? "Unrelease results" : "Release results"}
           </button>
@@ -265,7 +277,8 @@ export default function SubmissionPage({
               {submission.student_name}
             </h1>
             <p className="mt-2 text-sm text-[var(--ink-muted)]">
-              {submission.exam_title} · {submission.total_score}/{submission.total_marks} marks
+              {submission.exam_title} · {submission.total_score}/
+              {submission.total_marks} marks
             </p>
           </div>
           <span
@@ -282,9 +295,7 @@ export default function SubmissionPage({
           <section className="surface overflow-hidden xl:flex xl:min-h-0 xl:flex-col">
             <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
               <div>
-                <h2 className="text-2xl font-semibold">
-                  Original paper
-                </h2>
+                <h2 className="text-2xl font-semibold">Original paper</h2>
                 <p className="mt-1 text-sm text-[var(--ink-muted)]">
                   Use the page image as ground evidence.
                 </p>
@@ -367,9 +378,7 @@ export default function SubmissionPage({
                 <p className="text-sm text-[var(--ink-muted)]">
                   Assessment result
                 </p>
-                <h2 className="text-2xl font-semibold">
-                  Question review
-                </h2>
+                <h2 className="text-2xl font-semibold">Question review</h2>
                 <p className="mt-1 text-xs text-[var(--ink-muted)]">
                   Use Left and Right arrow keys to move between questions.
                 </p>

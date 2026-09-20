@@ -155,7 +155,11 @@ export default function ClassPage({
       setTemporaryPassword("");
       await load(data.id);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "The student account could not be provisioned.");
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "The student account could not be provisioned.",
+      );
     }
   }
   if (!data)
@@ -228,11 +232,23 @@ export default function ClassPage({
                   key={student.id}
                   className="flex items-center justify-between gap-3 py-3 text-sm"
                 >
-                  <Link href={`/students/${student.id}`} className="min-w-0 hover:text-[var(--brand)]">
+                  <Link
+                    href={`/students/${student.id}`}
+                    className="min-w-0 hover:text-[var(--brand)]"
+                  >
                     <span className="block font-semibold">{student.name}</span>
-                    <span className="font-mono text-xs text-[var(--ink-muted)]">{student.identifier}</span>
+                    <span className="font-mono text-xs text-[var(--ink-muted)]">
+                      {student.identifier}
+                    </span>
                   </Link>
-                  <button type="button" className="button-quiet shrink-0" onClick={() => { setAccountStudent(student); setAccountEmail(student.account?.email ?? ""); }}>
+                  <button
+                    type="button"
+                    className="button-quiet shrink-0"
+                    onClick={() => {
+                      setAccountStudent(student);
+                      setAccountEmail(student.account?.email ?? "");
+                    }}
+                  >
                     {student.account ? "Reset access" : "Create access"}
                   </button>
                 </div>
@@ -257,7 +273,9 @@ export default function ClassPage({
             </form>
             <div className="mt-6 border-t border-[var(--line)] pt-5">
               <h3 className="font-semibold">Add an existing student</h3>
-              <p className="mt-1 text-sm text-[var(--ink-muted)]">Search the current roster by name or identifier.</p>
+              <p className="mt-1 text-sm text-[var(--ink-muted)]">
+                Search the current roster by name or identifier.
+              </p>
               <input
                 value={studentSearch}
                 onChange={(event) => setStudentSearch(event.target.value)}
@@ -265,26 +283,34 @@ export default function ClassPage({
                 placeholder="Search students by name or identifier"
               />
               <div className="mt-2 overflow-hidden rounded-lg border border-[var(--line)]">
-                {searchingStudents && <p className="px-3 py-2 text-sm text-[var(--ink-muted)]">Searching students...</p>}
-                {!searchingStudents && availableStudents.length === 0 && <p className="px-3 py-2 text-sm text-[var(--ink-muted)]">No available students match this search.</p>}
+                {searchingStudents && (
+                  <p className="px-3 py-2 text-sm text-[var(--ink-muted)]">
+                    Searching students...
+                  </p>
+                )}
+                {!searchingStudents && availableStudents.length === 0 && (
+                  <p className="px-3 py-2 text-sm text-[var(--ink-muted)]">
+                    No available students match this search.
+                  </p>
+                )}
                 {availableStudents.length > 0 && (
                   <>
-                  {availableStudents.map((student) => (
-                    <button
-                      key={student.id}
-                      type="button"
-                      onClick={() => void addExisting(student.id)}
-                      className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-[var(--surface-muted)]"
-                    >
-                      <span>
-                        <strong>{student.name}</strong>
-                        <span className="ml-2 text-[var(--ink-muted)]">
-                          {student.identifier} · {student.class_name}
+                    {availableStudents.map((student) => (
+                      <button
+                        key={student.id}
+                        type="button"
+                        onClick={() => void addExisting(student.id)}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-[var(--surface-muted)]"
+                      >
+                        <span>
+                          <strong>{student.name}</strong>
+                          <span className="ml-2 text-[var(--ink-muted)]">
+                            {student.identifier} · {student.class_name}
+                          </span>
                         </span>
-                      </span>
-                      <span className="text-[var(--brand)]">Add</span>
-                    </button>
-                  ))}
+                        <span className="text-[var(--brand)]">Add</span>
+                      </button>
+                    ))}
                   </>
                 )}
               </div>
@@ -294,21 +320,48 @@ export default function ClassPage({
         {accountStudent && (
           <section className="surface mt-7 max-w-2xl p-6">
             <h2 className="text-2xl font-semibold">Student access</h2>
-            <p className="mt-2 text-sm text-[var(--ink-muted)]">Set a temporary password for {accountStudent.name}. They will be asked to change it after sign-in.</p>
-            <form onSubmit={provisionAccount} className="mt-5 grid gap-3 sm:grid-cols-2">
-              <input className="input" type="email" required value={accountEmail} onChange={(event) => setAccountEmail(event.target.value)} placeholder="Student email" />
-              <input className="input" type="password" required minLength={1} value={temporaryPassword} onChange={(event) => setTemporaryPassword(event.target.value)} placeholder="Temporary password" />
+            <p className="mt-2 text-sm text-[var(--ink-muted)]">
+              Set a temporary password for {accountStudent.name}. They will be
+              asked to change it after sign-in.
+            </p>
+            <form
+              onSubmit={provisionAccount}
+              className="mt-5 grid gap-3 sm:grid-cols-2"
+            >
+              <input
+                className="input"
+                type="email"
+                required
+                value={accountEmail}
+                onChange={(event) => setAccountEmail(event.target.value)}
+                placeholder="Student email"
+              />
+              <input
+                className="input"
+                type="password"
+                required
+                minLength={1}
+                value={temporaryPassword}
+                onChange={(event) => setTemporaryPassword(event.target.value)}
+                placeholder="Temporary password"
+              />
               <div className="flex gap-2 sm:col-span-2">
-                <button className="button-primary" type="submit">Save access</button>
-                <button className="button-quiet" type="button" onClick={() => setAccountStudent(null)}>Cancel</button>
+                <button className="button-primary" type="submit">
+                  Save access
+                </button>
+                <button
+                  className="button-quiet"
+                  type="button"
+                  onClick={() => setAccountStudent(null)}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </section>
         )}
         <section className="mt-7">
-          <h2 className="text-2xl font-semibold">
-            Class performance
-          </h2>
+          <h2 className="text-2xl font-semibold">Class performance</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <Metric
               label="Students"

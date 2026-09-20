@@ -93,8 +93,8 @@ export default function AssistantPage() {
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--ink-muted)]">
             Type <strong>@</strong> to connect a visible student, class, exam,
-            or paper. Rubriq uses only the selected records and active assessment
-            data.
+            or paper. Rubriq uses only the selected records and active
+            assessment data.
           </p>
         </div>
         <form onSubmit={ask} className="surface relative mt-7 p-4">

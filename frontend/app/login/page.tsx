@@ -21,7 +21,9 @@ export default function LoginPage() {
   const [saving, setSaving] = useState(false);
 
   // Sign up state
-  const [signupRole, setSignupRole] = useState<"teacher" | "student">("teacher");
+  const [signupRole, setSignupRole] = useState<"teacher" | "student">(
+    "teacher",
+  );
   const [signupName, setSignupName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
@@ -71,7 +73,10 @@ export default function LoginPage() {
         identifier: signupRole === "student" ? signupIdentifier : undefined,
       });
       const account = await refresh();
-      if (!account) throw new Error("Account created but session could not be established.");
+      if (!account)
+        throw new Error(
+          "Account created but session could not be established.",
+        );
       router.replace(account.role === "student" ? "/student" : "/");
       router.refresh();
     } catch (err) {
@@ -91,15 +96,22 @@ export default function LoginPage() {
     setResetError("");
     setResetSuccess("");
     try {
-      const res = await api.post<{ success: boolean; message: string }>("/api/auth/reset-password", {
-        email: resetEmail,
-        new_password: newPassword,
-      });
-      setResetSuccess(res.message || "Password updated successfully. You can now sign in.");
+      const res = await api.post<{ success: boolean; message: string }>(
+        "/api/auth/reset-password",
+        {
+          email: resetEmail,
+          new_password: newPassword,
+        },
+      );
+      setResetSuccess(
+        res.message || "Password updated successfully. You can now sign in.",
+      );
       setEmail(resetEmail);
       setPassword(newPassword);
     } catch (err) {
-      setResetError(err instanceof Error ? err.message : "Unable to reset password.");
+      setResetError(
+        err instanceof Error ? err.message : "Unable to reset password.",
+      );
     } finally {
       setResetting(false);
     }
@@ -107,7 +119,7 @@ export default function LoginPage() {
 
   return (
     <main
-      className="relative min-h-screen w-full flex items-center justify-center px-4 py-10 bg-cover bg-center bg-no-repeat selection:bg-[#0f4a3c]/15"
+      className="relative min-h-screen w-full flex items-center justify-center px-4 py-10 bg-cover bg-center bg-no-repeat selection:bg-[#17634e]/15"
       style={{ backgroundImage: "url('/campus-bg.jpg')" }}
     >
       {/* Subtle daylight wash overlay to enhance readability */}
@@ -117,7 +129,7 @@ export default function LoginPage() {
       <section className="relative z-10 w-full max-w-[480px] rounded-[28px] bg-white/95 backdrop-blur-md p-7 sm:p-9 shadow-[0_24px_60px_rgba(15,74,60,0.14),0_10px_25px_rgba(0,0,0,0.08)] border border-white/80 transition-all duration-300">
         <Link
           href="/"
-          className="inline-block text-3xl font-bold tracking-[-0.03em] text-[#0f4a3c] hover:opacity-95 transition-opacity"
+          className="inline-block text-3xl font-bold tracking-[-0.03em] text-[#17634e] hover:opacity-95 transition-opacity"
         >
           Rubriq
         </Link>
@@ -125,22 +137,33 @@ export default function LoginPage() {
         {/* ------------------- SIGN IN MODE ------------------- */}
         {mode === "signin" && (
           <>
-            <h1 className="mt-4 text-[32px] sm:text-[36px] font-bold tracking-[-0.03em] text-[#141f1c] leading-tight">
+            <h1 className="mt-4 text-[32px] sm:text-[36px] font-bold tracking-[-0.03em] text-[#14201c] leading-tight">
               Welcome back.
             </h1>
-            <p className="mt-2 text-sm leading-6 text-[#51625d]">
-              Sign in to access your examination workspace, review submissions, and evaluate evidence.
+            <p className="mt-2 text-sm leading-6 text-[#697770]">
+              Sign in to access your examination workspace, review submissions,
+              and evaluate evidence.
             </p>
 
             <form onSubmit={handleSignIn} className="mt-6 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-[#1e2925] mb-1.5">
+                <label className="block text-sm font-semibold text-[#14201c] mb-1.5">
                   Email
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#5e706b] pointer-events-none flex items-center">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <span className="absolute left-3.5 text-[#697770] pointer-events-none flex items-center">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.75}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
                     </svg>
                   </span>
                   <input
@@ -149,20 +172,30 @@ export default function LoginPage() {
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="name@institution.ac.in"
-                    className="w-full pl-11 pr-4 py-3 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-[#141f1c] text-sm placeholder-[#94a39f] focus:bg-white focus:border-[#0f4a3c] focus:ring-2 focus:ring-[#0f4a3c]/15 focus:outline-none transition-all"
+                    className="w-full pl-11 pr-4 py-3 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-[#14201c] text-sm placeholder-[#8ea29a] focus:bg-white focus:border-[#17634e] focus:ring-2 focus:ring-[#17634e]/15 focus:outline-none transition-all"
                     autoComplete="email"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#1e2925] mb-1.5">
+                <label className="block text-sm font-semibold text-[#14201c] mb-1.5">
                   Password
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#5e706b] pointer-events-none flex items-center">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <span className="absolute left-3.5 text-[#697770] pointer-events-none flex items-center">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.75}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
                     </svg>
                   </span>
                   <input
@@ -172,23 +205,49 @@ export default function LoginPage() {
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-11 pr-11 py-3 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-[#141f1c] text-sm placeholder-[#94a39f] focus:bg-white focus:border-[#0f4a3c] focus:ring-2 focus:ring-[#0f4a3c]/15 focus:outline-none transition-all"
+                    className="w-full pl-11 pr-11 py-3 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-[#14201c] text-sm placeholder-[#8ea29a] focus:bg-white focus:border-[#17634e] focus:ring-2 focus:ring-[#17634e]/15 focus:outline-none transition-all"
                     autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    className="absolute right-3.5 text-[#5e706b] hover:text-[#141f1c] transition-colors p-1 cursor-pointer focus:outline-none"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    className="absolute right-3.5 text-[#697770] hover:text-[#14201c] transition-colors p-1 cursor-pointer focus:outline-none"
                   >
                     {showPassword ? (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.75}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
+                        />
                       </svg>
                     ) : (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.75}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
                       </svg>
                     )}
                   </button>
@@ -202,7 +261,7 @@ export default function LoginPage() {
                     setResetEmail(email);
                     setMode("reset");
                   }}
-                  className="text-xs font-semibold text-[#0f4a3c] hover:underline cursor-pointer"
+                  className="text-xs font-semibold text-[#17634e] hover:underline cursor-pointer"
                 >
                   Forgot password?
                 </button>
@@ -210,8 +269,16 @@ export default function LoginPage() {
 
               {error && (
                 <div className="rounded-xl bg-[#fbeeed] border border-[#f5c6cb] p-3.5 text-sm text-[#a43838] flex items-center gap-2">
-                  <svg className="w-4 h-4 shrink-0 text-[#a43838]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  <svg
+                    className="w-4 h-4 shrink-0 text-[#a43838]"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   <span>{String(error)}</span>
                 </div>
@@ -220,7 +287,7 @@ export default function LoginPage() {
               <button
                 disabled={saving}
                 type="submit"
-                className="mt-2 w-full py-3.5 px-5 bg-[#0f4a3c] hover:bg-[#0b382d] active:scale-[0.99] text-white font-semibold text-[15px] rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                className="mt-2 w-full py-3.5 px-5 bg-[#17634e] hover:bg-[#0d3d31] active:scale-[0.99] text-white font-semibold text-[15px] rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {saving ? (
                   "Signing in..."
@@ -236,7 +303,7 @@ export default function LoginPage() {
             </form>
 
             {/* Switch to Sign Up */}
-            <div className="mt-5 text-center text-xs text-[#51625d]">
+            <div className="mt-5 text-center text-xs text-[#697770]">
               Don't have an account?{" "}
               <button
                 type="button"
@@ -245,7 +312,7 @@ export default function LoginPage() {
                   setSignupError("");
                   setMode("signup");
                 }}
-                className="font-semibold text-[#0f4a3c] hover:underline cursor-pointer ml-1"
+                className="font-semibold text-[#17634e] hover:underline cursor-pointer ml-1"
               >
                 Create an account
               </button>
@@ -256,17 +323,17 @@ export default function LoginPage() {
         {/* ------------------- SIGN UP MODE ------------------- */}
         {mode === "signup" && (
           <>
-            <h1 className="mt-4 text-[30px] sm:text-[34px] font-bold tracking-[-0.03em] text-[#141f1c] leading-tight">
+            <h1 className="mt-4 text-[30px] sm:text-[34px] font-bold tracking-[-0.03em] text-[#14201c] leading-tight">
               Create an account.
             </h1>
-            <p className="mt-1.5 text-xs sm:text-sm text-[#51625d]">
+            <p className="mt-1.5 text-xs sm:text-sm text-[#697770]">
               Select your role and set up your Rubriq examination credentials.
             </p>
 
             <form onSubmit={handleSignUp} className="mt-5 space-y-3.5">
               {/* Role Selection Cards */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#51625d] mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#697770] mb-2">
                   Select your role
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -276,14 +343,28 @@ export default function LoginPage() {
                     onClick={() => setSignupRole("teacher")}
                     className={`p-3.5 rounded-2xl text-left transition-all border-2 cursor-pointer ${
                       signupRole === "teacher"
-                        ? "border-[#0f4a3c] bg-[#e5f0ec]/70 text-[#0f4a3c] shadow-xs"
-                        : "border-[#d8e2de] bg-[#f8faf9] text-[#51625d] hover:bg-white"
+                        ? "border-[#17634e] bg-[#dcebe4]/70 text-[#17634e] shadow-xs"
+                        : "border-[#dfe3de] bg-[#f2f3ef] text-[#697770] hover:bg-white"
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                      <svg
+                        className="w-5 h-5 shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 14l9-5-9-5-9 5 9 5z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                        />
                       </svg>
                       <span className="font-bold text-sm">Teacher</span>
                     </div>
@@ -298,13 +379,23 @@ export default function LoginPage() {
                     onClick={() => setSignupRole("student")}
                     className={`p-3.5 rounded-2xl text-left transition-all border-2 cursor-pointer ${
                       signupRole === "student"
-                        ? "border-[#0f4a3c] bg-[#e5f0ec]/70 text-[#0f4a3c] shadow-xs"
-                        : "border-[#d8e2de] bg-[#f8faf9] text-[#51625d] hover:bg-white"
+                        ? "border-[#17634e] bg-[#dcebe4]/70 text-[#17634e] shadow-xs"
+                        : "border-[#dfe3de] bg-[#f2f3ef] text-[#697770] hover:bg-white"
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      <svg
+                        className="w-5 h-5 shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                        />
                       </svg>
                       <span className="font-bold text-sm">Student</span>
                     </div>
@@ -317,13 +408,23 @@ export default function LoginPage() {
 
               {/* Full Name */}
               <div>
-                <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                <label className="block text-xs font-semibold text-[#14201c] mb-1">
                   Full Name
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#5e706b] pointer-events-none flex items-center">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <span className="absolute left-3.5 text-[#697770] pointer-events-none flex items-center">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
                     </svg>
                   </span>
                   <input
@@ -331,21 +432,35 @@ export default function LoginPage() {
                     type="text"
                     value={signupName}
                     onChange={(e) => setSignupName(e.target.value)}
-                    placeholder={signupRole === "teacher" ? "Prof. Vishnu Priya" : "Student Name"}
-                    className="w-full pl-10 pr-4 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-[#141f1c] text-sm placeholder-[#94a39f] focus:bg-white focus:border-[#0f4a3c] focus:outline-none transition-all"
+                    placeholder={
+                      signupRole === "teacher"
+                        ? "Prof. Vishnu Priya"
+                        : "Student Name"
+                    }
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-[#14201c] text-sm placeholder-[#8ea29a] focus:bg-white focus:border-[#17634e] focus:outline-none transition-all"
                   />
                 </div>
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                <label className="block text-xs font-semibold text-[#14201c] mb-1">
                   Email Address
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#5e706b] pointer-events-none flex items-center">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <span className="absolute left-3.5 text-[#697770] pointer-events-none flex items-center">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
                     </svg>
                   </span>
                   <input
@@ -354,7 +469,7 @@ export default function LoginPage() {
                     value={signupEmail}
                     onChange={(e) => setSignupEmail(e.target.value)}
                     placeholder="name@institution.ac.in"
-                    className="w-full pl-10 pr-4 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-[#141f1c] text-sm placeholder-[#94a39f] focus:bg-white focus:border-[#0f4a3c] focus:outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-[#14201c] text-sm placeholder-[#8ea29a] focus:bg-white focus:border-[#17634e] focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -362,13 +477,23 @@ export default function LoginPage() {
               {/* Student Identifier / Roll Number (only for student) */}
               {signupRole === "student" && (
                 <div>
-                  <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                  <label className="block text-xs font-semibold text-[#14201c] mb-1">
                     Student ID / Roll Number
                   </label>
                   <div className="relative flex items-center">
-                    <span className="absolute left-3.5 text-[#5e706b] pointer-events-none flex items-center">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    <span className="absolute left-3.5 text-[#697770] pointer-events-none flex items-center">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+                        />
                       </svg>
                     </span>
                     <input
@@ -376,7 +501,7 @@ export default function LoginPage() {
                       value={signupIdentifier}
                       onChange={(e) => setSignupIdentifier(e.target.value)}
                       placeholder="e.g. 224770 or STU-001"
-                      className="w-full pl-10 pr-4 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-[#141f1c] text-sm placeholder-[#94a39f] focus:bg-white focus:border-[#0f4a3c] focus:outline-none transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-[#14201c] text-sm placeholder-[#8ea29a] focus:bg-white focus:border-[#17634e] focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -384,13 +509,23 @@ export default function LoginPage() {
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-semibold text-[#1e2925] mb-1">
+                <label className="block text-xs font-semibold text-[#14201c] mb-1">
                   Password
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#5e706b] pointer-events-none flex items-center">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <span className="absolute left-3.5 text-[#697770] pointer-events-none flex items-center">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
                     </svg>
                   </span>
                   <input
@@ -400,22 +535,48 @@ export default function LoginPage() {
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-[#141f1c] text-sm placeholder-[#94a39f] focus:bg-white focus:border-[#0f4a3c] focus:outline-none transition-all"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-[#14201c] text-sm placeholder-[#8ea29a] focus:bg-white focus:border-[#17634e] focus:outline-none transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setSignupShowPassword(!signupShowPassword)}
-                    aria-label={signupShowPassword ? "Hide password" : "Show password"}
-                    className="absolute right-3 text-[#5e706b] hover:text-[#141f1c] transition-colors p-1 cursor-pointer focus:outline-none"
+                    aria-label={
+                      signupShowPassword ? "Hide password" : "Show password"
+                    }
+                    className="absolute right-3 text-[#697770] hover:text-[#14201c] transition-colors p-1 cursor-pointer focus:outline-none"
                   >
                     {signupShowPassword ? (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
+                        />
                       </svg>
                     ) : (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
                       </svg>
                     )}
                   </button>
@@ -431,13 +592,16 @@ export default function LoginPage() {
               <button
                 disabled={signupSaving}
                 type="submit"
-                className="mt-2 w-full py-3.5 px-5 bg-[#0f4a3c] hover:bg-[#0b382d] active:scale-[0.99] text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                className="mt-2 w-full py-3.5 px-5 bg-[#17634e] hover:bg-[#0d3d31] active:scale-[0.99] text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 {signupSaving ? (
                   "Creating account..."
                 ) : (
                   <>
-                    <span>Create {signupRole === "teacher" ? "Teacher" : "Student"} Account</span>
+                    <span>
+                      Create {signupRole === "teacher" ? "Teacher" : "Student"}{" "}
+                      Account
+                    </span>
                     <span aria-hidden="true" className="text-base leading-none">
                       →
                     </span>
@@ -447,7 +611,7 @@ export default function LoginPage() {
             </form>
 
             {/* Switch to Sign In */}
-            <div className="mt-4 text-center text-xs text-[#51625d]">
+            <div className="mt-4 text-center text-xs text-[#697770]">
               Already have an account?{" "}
               <button
                 type="button"
@@ -456,7 +620,7 @@ export default function LoginPage() {
                   setSignupError("");
                   setMode("signin");
                 }}
-                className="font-semibold text-[#0f4a3c] hover:underline cursor-pointer ml-1"
+                className="font-semibold text-[#17634e] hover:underline cursor-pointer ml-1"
               >
                 Sign in
               </button>
@@ -468,24 +632,24 @@ export default function LoginPage() {
         {mode === "reset" && (
           <div className="mt-2">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-[#141f1c]">
+              <h2 className="text-2xl font-bold text-[#14201c]">
                 Reset password
               </h2>
               <button
                 type="button"
                 onClick={() => setMode("signin")}
-                className="text-xs font-semibold text-[#51625d] hover:text-[#141f1c] cursor-pointer"
+                className="text-xs font-semibold text-[#697770] hover:text-[#14201c] cursor-pointer"
               >
                 ← Back
               </button>
             </div>
-            <p className="mt-2 text-sm leading-6 text-[#51625d]">
+            <p className="mt-2 text-sm leading-6 text-[#697770]">
               Enter your account email and choose a new password.
             </p>
 
             <form onSubmit={handleResetPassword} className="mt-5 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-[#1e2925] mb-1.5">
+                <label className="block text-sm font-semibold text-[#14201c] mb-1.5">
                   Email
                 </label>
                 <input
@@ -494,12 +658,12 @@ export default function LoginPage() {
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   placeholder="name@institution.ac.in"
-                  className="w-full px-4 py-3 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-[#141f1c] text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none transition-all"
+                  className="w-full px-4 py-3 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-[#14201c] text-sm focus:bg-white focus:border-[#17634e] focus:outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#1e2925] mb-1.5">
+                <label className="block text-sm font-semibold text-[#14201c] mb-1.5">
                   New Password
                 </label>
                 <input
@@ -509,12 +673,12 @@ export default function LoginPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password"
-                  className="w-full px-4 py-3 bg-[#f8faf9] border border-[#d8e2de] rounded-xl text-[#141f1c] text-sm focus:bg-white focus:border-[#0f4a3c] focus:outline-none transition-all"
+                  className="w-full px-4 py-3 bg-[#f2f3ef] border border-[#dfe3de] rounded-xl text-[#14201c] text-sm focus:bg-white focus:border-[#17634e] focus:outline-none transition-all"
                 />
               </div>
 
               {resetSuccess && (
-                <div className="rounded-xl bg-[#eaf3f0] border border-[#b2dfdb] p-3 text-sm text-[#0f4a3c]">
+                <div className="rounded-xl bg-[#eaf3f0] border border-[#b2dfdb] p-3 text-sm text-[#17634e]">
                   {resetSuccess}
                 </div>
               )}
@@ -528,7 +692,7 @@ export default function LoginPage() {
               <button
                 disabled={resetting}
                 type="submit"
-                className="w-full py-3.5 px-5 bg-[#0f4a3c] hover:bg-[#0b382d] text-white font-semibold text-sm rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-60"
+                className="w-full py-3.5 px-5 bg-[#17634e] hover:bg-[#0d3d31] text-white font-semibold text-sm rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-60"
               >
                 {resetting ? "Updating..." : "Update password"}
               </button>
@@ -537,7 +701,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setMode("signin")}
-                  className="w-full py-2.5 text-center text-sm font-semibold text-[#0f4a3c] hover:underline cursor-pointer"
+                  className="w-full py-2.5 text-center text-sm font-semibold text-[#17634e] hover:underline cursor-pointer"
                 >
                   Return to Sign in →
                 </button>
@@ -547,9 +711,19 @@ export default function LoginPage() {
         )}
 
         {/* Footer Security Badge */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#51625d] font-medium">
-          <svg className="w-3.5 h-3.5 text-[#0f4a3c]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#697770] font-medium">
+          <svg
+            className="w-3.5 h-3.5 text-[#17634e]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
           </svg>
           <span>Secure examination workspace</span>
         </div>

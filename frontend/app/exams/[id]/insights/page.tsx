@@ -80,23 +80,21 @@ export default function ExamInsightsPage({
 
   if (loading)
     return (
-      <main className="grid min-h-screen place-items-center bg-[#f5f1e9] text-[#667174]">
+      <main className="grid min-h-screen place-items-center bg-[#f2f3ef] text-[#667174]">
         Loading exam insights...
       </main>
     );
   if (error || !exam || !analytics)
     return (
-      <main className="min-h-screen bg-[#f5f1e9] p-6 text-[#172126]">
+      <main className="min-h-screen bg-[#f2f3ef] p-6 text-[#14201c]">
         <div className="mx-auto max-w-xl rounded-lg border border-[#a15130]/25 bg-[#fff4e9] p-7">
-          <h1 className="text-2xl font-semibold">
-            Insights unavailable
-          </h1>
+          <h1 className="text-2xl font-semibold">Insights unavailable</h1>
           <p className="mt-3 text-sm text-[#8b3d20]">
             {error || "This exam could not be found."}
           </p>
           <Link
             href={error ? "/login" : "/exams"}
-            className="mt-5 inline-block font-medium text-[#173f4c] underline underline-offset-4"
+            className="mt-5 inline-block font-medium text-[#17634e] underline underline-offset-4"
           >
             {error ? "Open sign in" : "Back to exams"}
           </Link>
@@ -170,9 +168,7 @@ export default function ExamInsightsPage({
           questions.length === 0 &&
           criteria.length === 0 && (
             <section className="surface-lined mt-7 p-7">
-              <h2 className="text-2xl font-semibold">
-                No evaluated data yet
-              </h2>
+              <h2 className="text-2xl font-semibold">No evaluated data yet</h2>
               <p className="mt-2 text-sm leading-6 text-[var(--ink-muted)]">
                 Upload and complete at least one student paper to see concept
                 performance and review signals here.
@@ -218,9 +214,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="surface p-5">
       <p className="text-sm font-medium text-[var(--ink-muted)]">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-[-0.02em]">
-        {value}
-      </p>
+      <p className="mt-1 text-2xl font-semibold tracking-[-0.02em]">{value}</p>
     </div>
   );
 }

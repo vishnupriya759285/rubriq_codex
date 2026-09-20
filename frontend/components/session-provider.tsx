@@ -71,8 +71,7 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
   const isLogin = pathname === "/login";
   const isStudentRoute =
     pathname === "/student" || pathname.startsWith("/student/");
-  const isAdminRoute =
-    pathname === "/admin" || pathname.startsWith("/admin/");
+  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
 
   useEffect(() => {
     if (loading) return;
@@ -102,7 +101,7 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
     (isLogin && !account) ||
     (account?.role === "student" && isStudentRoute) ||
     (account?.role === "teacher" && !isStudentRoute && !isAdminRoute) ||
-    (account?.role === "admin");
+    account?.role === "admin";
 
   if (loading || !permitted) return null;
   return children;
