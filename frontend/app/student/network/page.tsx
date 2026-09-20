@@ -75,8 +75,8 @@ export default function CampusNetworkPage() {
   const [loading, setLoading] = useState(true);
   const [matching, setMatching] = useState(false);
   const [searchMessage, setSearchMessage] = useState<string | null>(null);
-  const [expandedProjects, setExpandedProjects] = useState<Record<number, boolean>>({});
-  const toggleProjects = (id: number) => {
+  const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
+  const toggleProjects = (id: string) => {
     setExpandedProjects((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
