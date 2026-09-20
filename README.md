@@ -93,36 +93,38 @@ During the development and operation of Rubriq, OpenAI tools, Codex, and APIs we
 
 ### Demo / Pitch Video
 
-* **Video Link:** [Watch Demo Video on YouTube / Loom](https://www.youtube.com/watch?v=REPLACE_WITH_YOUR_VIDEO_URL) *(Replace with your video link)*
+* **Video Link:** https://drive.google.com/file/d/1pdxzzlV4bB4U4A4qG-heNU_sU7RYINyJ/view?usp=sharing
 
-```text
-https://www.youtube.com/watch?v=REPLACE_WITH_YOUR_VIDEO_URL
-```
 
----
 
 ## Screenshots
 
 ### 1. Evidence-Based Teacher Review Workbench
 *Dual-pane review: inspect original handwriting on the left while reviewing AI criteria, confidence scores, and quoted evidence on the right.*
-![Evidence Review Workbench](docs/assets/screenshots/review-workbench.png)
+<img width="1872" height="878" alt="image" src="https://github.com/user-attachments/assets/90c4ae50-826c-4b14-abbf-1db0550eb051" />
+
 
 ### 2. Deep Exam Analytics & Learning Insights
 *Deterministic score distributions, question difficulty index, and concept mastery curves.*
-![Learning Insights](docs/assets/screenshots/exam-insights.png)
+<img width="1913" height="856" alt="image" src="https://github.com/user-attachments/assets/3fbfe878-6af2-457d-8e2c-7302f865d8ee" />
+
 
 ### 3. Assessment & Examination Management
 *Class rosters, paper upload queues, and grading lifecycle dashboard.*
-![Assessment Workspace](docs/assets/screenshots/dashboard.png)
+<img width="1882" height="842" alt="image" src="https://github.com/user-attachments/assets/7dab7d7f-de9b-413d-b2d9-3a940ea501f6" />
+
 
 ### 4. Student Portal & Campus Knowledge Network
 *Students inspect their released paper feedback and connect with verified mentors for targeted guidance.*
+<img width="1130" height="917" alt="image" src="https://github.com/user-attachments/assets/f49c7ae7-f0f1-4571-94b9-b766b7bb599f" />
+
 
 | Student Examination Feedback | Campus Knowledge Network |
 | :---: | :---: |
-| ![Student Script Review](docs/assets/screenshots/exam-detail.png) | *[Add Screenshot: `docs/assets/screenshots/campus-network.png`]* |
+<img width="1046" height="571" alt="image" src="https://github.com/user-attachments/assets/54d409cc-2534-4afb-83da-98b3462e8fb5" />
+<img width="807" height="782" alt="image" src="https://github.com/user-attachments/assets/8d654e7f-ec78-4f14-9e72-df7e93aedca5" />
+<img width="815" height="662" alt="image" src="https://github.com/user-attachments/assets/8c0ec66b-a604-407a-8625-8bfc270fbdb9" />
 
----
 
 ## How to Run Locally
 
