@@ -602,10 +602,20 @@ export default function StudentPortal() {
 }
 
 function SubmissionEvidence({ selected }: { selected: Submission | null }) {
+  const [filter, setFilter] = useState<"all" | "missed" | "perfect">("all");
+  const [expandedIds, setExpandedIds] = useState<Record<string | number, boolean>>({});
+  const [expandAll, setExpandAll] = useState(false);
+
   if (!selected) {
     return (
-      <div className="rounded-2xl bg-white border border-[#d8e2de] p-8 text-center text-[#51625d]">
-        <p className="text-sm">Select an exam on the left to see criterion feedback.</p>
+      <div className="rounded-3xl bg-white border border-[#d8e2de] p-12 text-center text-[#51625d] shadow-xs">
+        <div className="mx-auto w-12 h-12 rounded-2xl bg-[#e5f0ec] text-[#0f4a3c] flex items-center justify-center text-xl mb-3 shadow-xs">
+          📄
+        </div>
+        <h3 className="text-base font-bold text-[#0d1a16]">Select an Examination</h3>
+        <p className="text-xs text-[#51625d] mt-1 max-w-xs mx-auto">
+          Choose a released examination on the left to review marks breakdown, teacher notes, and AI feedback.
+        </p>
       </div>
     );
   }
@@ -614,93 +624,214 @@ function SubmissionEvidence({ selected }: { selected: Submission | null }) {
     ? Math.round((selected.total_score / selected.total_marks) * 100)
     : 0;
 
+  const evaluations = selected.evaluations || [];
+  const missedCount = evaluations.filter((e) => e.marks < e.max_marks).length;
+  const perfectCount = evaluations.filter((e) => e.marks === e.max_marks).length;
+
+  const filteredEvaluations = evaluations.filter((e) => {
+    if (filter === "missed") return e.marks < e.max_marks;
+    if (filter === "perfect") return e.marks === e.max_marks;
+    return true;
+  });
+
+  const toggleExpand = (id: string | number) => {
+    setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleToggleAll = () => {
+    const next = !expandAll;
+    setExpandAll(next);
+    const newExpanded: Record<string | number, boolean> = {};
+    evaluations.forEach((e, idx) => {
+      newExpanded[e.id || idx] = next;
+    });
+    setExpandedIds(newExpanded);
+  };
+
   return (
     <div className="rounded-3xl bg-white border border-[#d8e2de] shadow-xs overflow-hidden">
-      {/* Evidence Card Header */}
-      <div className="border-b border-[#e8eeec] p-6 bg-gradient-to-r from-[#f9fbfa] to-white">
-        <div className="flex items-start justify-between gap-4">
+      {/* Evidence Card Header with Modern Visual Meter */}
+      <div className="border-b border-[#e8eeec] p-6 bg-gradient-to-br from-[#f8faf9] via-white to-[#f0f6f3]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <span className="text-xs font-semibold text-[#0f4a3c] uppercase tracking-wider">
-              {selected.subject}
-            </span>
-            <h2 className="text-xl font-bold text-[#0d1a16] mt-1 tracking-[-0.025em]">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-[#0f4a3c] uppercase tracking-wider bg-[#e5f0ec] px-2.5 py-0.5 rounded-full">
+                {selected.subject}
+              </span>
+              <span className="text-xs text-[#51625d]">
+                Released:{" "}
+                {selected.released_at
+                  ? new Date(selected.released_at).toLocaleDateString()
+                  : new Date(selected.created_at).toLocaleDateString()}
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0d1a16] mt-1.5 tracking-[-0.025em]">
               {selected.exam_title}
             </h2>
             <p className="text-xs text-[#51625d] mt-1">
-              Released on{" "}
-              {selected.released_at
-                ? new Date(selected.released_at).toLocaleDateString()
-                : new Date(selected.created_at).toLocaleDateString()}
+              Verified rubric grading with page-by-page evidence quotes.
             </p>
           </div>
 
-          <div className="rounded-2xl bg-[#e5f0ec] px-4 py-2.5 text-center shrink-0 border border-[#cbe2da]">
-            <span className="block text-xl font-bold text-[#0f4a3c] tracking-[-0.025em]">
-              {selected.total_score}/{selected.total_marks}
-            </span>
-            <span className="block text-[11px] font-semibold text-[#0f4a3c] uppercase tracking-wide">
-              {percentage}% Final Score
-            </span>
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="rounded-2xl bg-white p-3 px-4 text-center border border-[#d2e0db] shadow-xs">
+              <div className="text-2xl font-bold text-[#0f4a3c] tracking-[-0.03em] leading-none">
+                {selected.total_score}
+                <span className="text-xs font-normal text-[#51625d] ml-0.5">/{selected.total_marks}</span>
+              </div>
+              <span
+                className={`inline-block mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                  percentage >= 75
+                    ? "bg-[#e5f0ec] text-[#0f4a3c]"
+                    : percentage >= 50
+                    ? "bg-[#fff2e7] text-[#9d552d]"
+                    : "bg-[#fbeeed] text-[#a43838]"
+                }`}
+              >
+                {percentage}% Score
+              </span>
+            </div>
           </div>
+        </div>
+
+        {/* Quick Filter & Expand Controls Bar */}
+        <div className="mt-5 pt-4 border-t border-[#e8eeec] flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setFilter("all")}
+              className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                filter === "all"
+                  ? "bg-[#0f4a3c] text-white shadow-xs"
+                  : "bg-white text-[#51625d] hover:bg-[#f0f5f3] border border-[#d8e2de]"
+              }`}
+            >
+              All Criteria ({evaluations.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter("missed")}
+              className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                filter === "missed"
+                  ? "bg-[#9d552d] text-white shadow-xs"
+                  : "bg-white text-[#9d552d] hover:bg-[#fff2e7] border border-[#d8e2de]"
+              }`}
+            >
+              ⚠️ Missed Marks ({missedCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter("perfect")}
+              className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                filter === "perfect"
+                  ? "bg-[#0f4a3c] text-white shadow-xs"
+                  : "bg-white text-[#0f4a3c] hover:bg-[#e5f0ec] border border-[#d8e2de]"
+              }`}
+            >
+              ✓ Full Marks ({perfectCount})
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleToggleAll}
+            className="text-xs text-[#0f4a3c] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+          >
+            {expandAll ? "Collapse All Details ▲" : "Expand All Details ▼"}
+          </button>
         </div>
       </div>
 
-      {/* Criterion-by-criterion List */}
-      <div className="divide-y divide-[#e8eeec] max-h-[680px] overflow-y-auto">
-        {selected.evaluations?.map((evaluation, idx) => {
+      {/* Criterion-by-criterion List - Clean Accordion Cards */}
+      <div className="divide-y divide-[#e8eeec] max-h-[720px] overflow-y-auto">
+        {filteredEvaluations.map((evaluation, idx) => {
+          const key = evaluation.id || idx;
+          const isExpanded = expandedIds[key] ?? (filter === "missed");
           const fullMarks = evaluation.marks === evaluation.max_marks;
           const zeroMarks = evaluation.marks === 0;
+          const lostMarks = evaluation.max_marks - evaluation.marks;
 
           return (
-            <article key={evaluation.id || idx} className="p-5 sm:p-6 hover:bg-[#fbfcfb] transition-colors">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block px-2.5 py-1 rounded-md bg-[#eef3f1] font-mono font-bold text-xs text-[#141f1c]">
+            <article
+              key={key}
+              className="p-4 sm:p-5 hover:bg-[#fafcfb] transition-all group"
+            >
+              <div
+                onClick={() => toggleExpand(key)}
+                className="flex items-start justify-between gap-3 cursor-pointer select-none"
+              >
+                <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                  <span className="shrink-0 mt-0.5 inline-block px-2 py-0.5 rounded-lg bg-[#eef3f1] font-mono font-bold text-xs text-[#141f1c] border border-[#dbe4e0]">
                     {evaluation.question_number || `Q${idx + 1}`}
                   </span>
-                  <h3 className="font-semibold text-sm sm:text-base text-[#141f1c]">
-                    {evaluation.criterion_title}
-                  </h3>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-sm sm:text-[14.5px] text-[#0d1a16] leading-snug group-hover:text-[#0f4a3c] transition-colors">
+                      {evaluation.criterion_title}
+                    </h3>
+                    <div className="mt-1 flex items-center gap-2 text-xs text-[#51625d]">
+                      <span className="text-[11px] text-[#0f4a3c] font-medium flex items-center gap-0.5">
+                        {isExpanded ? "Hide rationale ▲" : "View rationale ▾"}
+                      </span>
+                      {evaluation.evidence?.length ? (
+                        <span className="text-[11px] text-[#71827d]">
+                          · {evaluation.evidence.length} quote evidence
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
 
-                <span
-                  className={`font-mono text-sm font-bold px-2.5 py-1 rounded-lg shrink-0 ${
-                    fullMarks
-                      ? "bg-[#e5f0ec] text-[#0f4a3c]"
-                      : zeroMarks
-                      ? "bg-[#fbeeed] text-[#a43838]"
-                      : "bg-[#fff2e7] text-[#9d552d]"
-                  }`}
-                >
-                  {evaluation.marks} / {evaluation.max_marks} marks
-                </span>
+                <div className="shrink-0 text-right flex items-center gap-2">
+                  <span
+                    className={`font-mono text-xs sm:text-sm font-bold px-2.5 py-1 rounded-xl shadow-2xs ${
+                      fullMarks
+                        ? "bg-[#e8f3ef] text-[#0a382d] border border-[#c6dfd6]"
+                        : zeroMarks
+                        ? "bg-[#fbeeed] text-[#a43838] border border-[#f4cbcd]"
+                        : "bg-[#fff2e7] text-[#9d552d] border border-[#f8dec8]"
+                    }`}
+                  >
+                    {evaluation.marks} / {evaluation.max_marks}
+                  </span>
+                  {!fullMarks && lostMarks > 0 && (
+                    <span className="hidden sm:inline-block text-[11px] font-bold text-[#a43838] bg-rose-50 px-1.5 py-0.5 rounded-md border border-rose-200">
+                      -{lostMarks}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {evaluation.reason && (
-                <div className="mt-3 rounded-xl bg-[#f8faf9] p-3.5 border border-[#e2e8e5] text-xs sm:text-sm text-[#384643] leading-relaxed">
-                  <span className="font-semibold text-[#0f4a3c] block mb-0.5">
-                    Rubriq AI Evaluation Rationale:
-                  </span>
-                  {evaluation.reason}
+              {/* Collapsible Details: Rationale & Evidence */}
+              {isExpanded && (
+                <div className="mt-3.5 space-y-2.5 pt-3 border-t border-[#f0f4f2] animate-fadeIn">
+                  {evaluation.reason && (
+                    <div className="rounded-2xl bg-[#f8faf9] p-3.5 border border-[#e4ece8] text-xs sm:text-[13px] text-[#31423d] leading-relaxed">
+                      <div className="flex items-center gap-1.5 font-bold text-[#0f4a3c] text-xs mb-1">
+                        <span>💡</span>
+                        <span>Rubriq AI Evaluation Rationale</span>
+                      </div>
+                      <p>{evaluation.reason}</p>
+                    </div>
+                  )}
+
+                  {evaluation.evidence?.length ? (
+                    <div className="space-y-1.5">
+                      {evaluation.evidence.map((ev, evIdx) => (
+                        <div
+                          key={evIdx}
+                          className="text-xs text-[#425550] flex items-center gap-2 bg-[#f4f7f6] px-3 py-2 rounded-xl border border-[#e5eeea]"
+                        >
+                          <span className="text-[#0f4a3c] font-bold text-xs">📄</span>
+                          {ev.page ? (
+                            <span className="font-semibold text-[#0d1a16]">Page {ev.page}:</span>
+                          ) : null}
+                          <span className="italic truncate text-[#51625d]">"{ev.quote}"</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               )}
-
-              {evaluation.evidence?.length ? (
-                <div className="mt-3 space-y-1.5">
-                  {evaluation.evidence.map((ev, evIdx) => (
-                    <div
-                      key={evIdx}
-                      className="text-xs text-[#51625d] flex items-center gap-1.5 bg-[#f3f7f5] px-3 py-1.5 rounded-lg"
-                    >
-                      <svg className="w-3.5 h-3.5 text-[#0f4a3c] shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                      </svg>
-                      {ev.page ? <span className="font-semibold">Page {ev.page}:</span> : null}
-                      <span className="italic truncate">"{ev.quote}"</span>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
             </article>
           );
         })}
