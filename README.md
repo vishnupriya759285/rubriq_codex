@@ -79,8 +79,7 @@ During the development and operation of Rubriq, OpenAI tools, Codex, and APIs we
 
 ### Live Demo
 
-* **Web Application:** `https://rubriq.your-domain.com` *(Replace with your live deployment URL)*
-* **API Documentation:** `https://api.rubriq.your-domain.com/docs`
+* **Web Application:**  https://drive.google.com/file/d/1pdxzzlV4bB4U4A4qG-heNU_sU7RYINyJ/view?usp=sharing
 
 #### Demo Credentials for Testing
 
