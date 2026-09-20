@@ -655,7 +655,7 @@ export default function CampusNetworkPage() {
                 </div>
               )}
 
-              {/* Mentor Cards Grid - Clean, Modern & Cool Bento-style */}
+              {/* Mentor Cards Grid - Clean, Beautiful, Uncluttered */}
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                 {mentors.map((mentor) => {
                   const isProjectsOpen = expandedProjects[mentor.id];
@@ -667,14 +667,21 @@ export default function CampusNetworkPage() {
                     .join("")
                     .toUpperCase();
 
+                  // Merge verified badges & skills into a single non-duplicate list
+                  const verifiedSkills = (mentor.verified_badges || []).map((b) => ({
+                    name: b.badge_title.replace(/^Verified\s+/i, "").replace(/\s+Mentor$/i, ""),
+                    isVerified: true,
+                  }));
+                  const otherSkills = (mentor.skills || [])
+                    .filter((s) => !verifiedSkills.some((v) => v.name.toLowerCase() === s.toLowerCase()))
+                    .map((s) => ({ name: s, isVerified: false }));
+                  const allSkills = [...verifiedSkills, ...otherSkills];
+
                   return (
                     <div
                       key={mentor.id}
-                      className="group relative rounded-2xl bg-white border border-[#e2eae6] hover:border-[#0f4a3c]/35 p-5 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                      className="group relative rounded-2xl bg-white border border-[#e4ece8] hover:border-[#0f4a3c]/30 hover:shadow-lg transition-all duration-200 p-5 flex flex-col justify-between"
                     >
-                      {/* Top subtle hover accent */}
-                      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#0f4a3c] via-[#156d58] to-[#1bb58d] opacity-0 group-hover:opacity-100 transition-opacity" />
-
                       <div>
                         {/* Match rationale callout if returned by AI matching */}
                         {mentor.match_reason && (
@@ -684,128 +691,91 @@ export default function CampusNetworkPage() {
                           </div>
                         )}
 
-                        {/* Profile Header with Avatar & Details */}
+                        {/* Profile Header: Circular Avatar + Name + Role */}
                         <div className="flex items-start gap-3">
                           <div className="relative shrink-0">
-                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#0f4a3c] via-[#165a4a] to-[#0a382d] text-white flex items-center justify-center font-bold text-xs tracking-wider shadow-xs border border-white/20">
+                            <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#0f4a3c] to-[#1e7a63] text-white flex items-center justify-center font-bold text-xs tracking-wider shadow-xs ring-2 ring-emerald-100">
                               {initials}
                             </div>
                             <span
-                              className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"
+                              className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"
                               title="Active Verified Mentor"
                             />
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <h3 className="text-[15px] font-bold text-[#0d1a16] tracking-[-0.02em] truncate group-hover:text-[#0f4a3c] transition-colors">
+                            <div className="flex items-center justify-between gap-1">
+                              <h3 className="text-[15px] font-bold text-[#0d1a16] truncate group-hover:text-[#0f4a3c] transition-colors">
                                 {mentor.name}
                               </h3>
-                              <span className="font-semibold text-[#0f4a3c] bg-[#e5f0ec] px-2 py-0.5 rounded-md text-[10.5px]">
+                              <span className="shrink-0 text-[10.5px] font-semibold text-[#0f4a3c] bg-[#eef5f2] px-2 py-0.5 rounded-full border border-[#d6e7df]">
                                 {mentor.role}
                               </span>
                             </div>
-                            <div className="text-[11.5px] text-[#51625d] truncate mt-0.5">
+                            <p className="text-xs text-[#627570] truncate mt-0.5">
                               {mentor.department} {mentor.year_or_batch ? `· ${mentor.year_or_batch}` : ""}
-                            </div>
+                            </p>
                           </div>
-
-                          {/* Status pill if connected or pending */}
-                          {mentor.connection_state === "accepted" ? (
-                            <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-[#e5f0ec] text-[#0f4a3c]">
-                              ✓ Mentor
-                            </span>
-                          ) : mentor.connection_state === "pending" ? (
-                            <span className="shrink-0 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-[#fff2e7] text-[#9d552d]">
-                              Pending
-                            </span>
-                          ) : null}
                         </div>
 
-                        {/* Verified Badges Section - Cleaned up to avoid repetitive walls of text */}
-                        {mentor.verified_badges?.length > 0 && (
-                          <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                            {mentor.verified_badges.slice(0, 3).map((b) => {
-                              const cleanName = b.badge_title
-                                .replace(/^Verified\s+/i, "")
-                                .replace(/\s+Mentor$/i, "");
-                              return (
-                                <span
-                                  key={b.id}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#e8f3ef] text-[#0a382d] border border-[#c4ded4]"
-                                >
-                                  <svg className="w-3 h-3 text-[#0f4a3c]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                  </svg>
-                                  {cleanName}
-                                </span>
-                              );
-                            })}
-                            {mentor.verified_badges.length > 3 && (
-                              <span className="text-[10px] font-semibold text-[#51625d] bg-[#f0f4f2] px-2 py-0.5 rounded-full border border-[#dce6e2]">
-                                +{mentor.verified_badges.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        )}
+                        {/* Bio: Exactly 2 lines with fixed height so cards stay aligned */}
+                        <p className="mt-3 text-xs text-[#526460] line-clamp-2 leading-relaxed h-[34px]">
+                          {mentor.bio || "Available for technical architecture, projects, and guidance."}
+                        </p>
 
-                        {/* Bio */}
-                        {mentor.bio && (
-                          <p className="mt-2.5 text-xs text-[#51625d] line-clamp-2 leading-relaxed">
-                            {mentor.bio}
-                          </p>
-                        )}
+                        {/* Unified Top Skills: Single clean row with verified checkmarks */}
+                        <div className="mt-3 flex items-center gap-1.5 overflow-hidden">
+                          {allSkills.slice(0, 3).map((skill) => (
+                            <span
+                              key={skill.name}
+                              className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
+                                skill.isVerified
+                                  ? "bg-[#e8f3ef] text-[#0a382d] border border-[#c6dfd6]"
+                                  : "bg-[#f4f7f6] text-[#2d3f3a] border border-[#e2e8e5]"
+                              }`}
+                            >
+                              {skill.isVerified && <span className="text-[#0f4a3c] font-bold">✓</span>}
+                              <span>{skill.name}</span>
+                            </span>
+                          ))}
+                          {allSkills.length > 3 && (
+                            <span className="shrink-0 text-[10.5px] font-semibold text-[#5a6e68] bg-[#f0f4f2] px-2 py-0.5 rounded-full border border-[#dce6e2]">
+                              +{allSkills.length - 3}
+                            </span>
+                          )}
+                        </div>
 
-                        {/* Skills & Tech Stack */}
-                        {mentor.skills?.length > 0 && (
-                          <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                            {mentor.skills.slice(0, 4).map((s) => (
-                              <span
-                                key={s}
-                                className="px-2 py-0.5 rounded-md bg-[#f4f7f6] text-[11px] font-medium text-[#1e2e2a] border border-[#e2e8e5]"
-                              >
-                                {s}
-                              </span>
-                            ))}
-                            {mentor.skills.length > 4 && (
-                              <span className="text-[10px] text-[#51625d] font-semibold px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200">
-                                +{mentor.skills.length - 4}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Real Projects Built - Interactive Portfolio Drawer */}
+                        {/* Featured Projects Drawer: Sleek & Compact */}
                         {mentor.projects?.length > 0 && (
                           <div className="mt-3">
                             <button
                               type="button"
                               onClick={() => toggleProjects(mentor.id)}
-                              className="w-full py-1.5 px-3 rounded-xl bg-[#f8faf9] hover:bg-[#ebf3ef] border border-[#dfe8e4] text-xs font-semibold text-[#0f4a3c] flex items-center justify-between transition-colors cursor-pointer"
+                              className="w-full py-1.5 px-3 rounded-xl bg-[#f8faf9] hover:bg-[#eef5f2] border border-[#e2e8e5] text-xs font-semibold text-[#0f4a3c] flex items-center justify-between transition-colors cursor-pointer"
                             >
-                              <span className="flex items-center gap-1.5">
+                              <span className="flex items-center gap-1.5 text-[11.5px]">
                                 <span>⚡</span>
                                 <span>
                                   {mentor.projects.length} Verified {mentor.projects.length === 1 ? "Project" : "Projects"}
                                 </span>
                               </span>
-                              <span className="text-[11px] text-[#51625d] font-normal flex items-center gap-0.5">
-                                {isProjectsOpen ? "Collapse ▲" : "View portfolio ▼"}
+                              <span className="text-[11px] text-[#5a6e68] font-normal">
+                                {isProjectsOpen ? "Close ▲" : "View ▾"}
                               </span>
                             </button>
 
                             {isProjectsOpen && (
-                              <div className="mt-2 space-y-2 pt-1 animate-fadeIn">
+                              <div className="mt-2 space-y-1.5 animate-fadeIn">
                                 {mentor.projects.map((p, idx) => (
                                   <div
                                     key={idx}
-                                    className="p-2.5 rounded-xl bg-[#fdfefe] border border-[#e2eae6] text-xs"
+                                    className="p-2.5 rounded-xl bg-[#fcfdfd] border border-[#e5eeea] text-xs"
                                   >
                                     <div className="font-semibold text-[#0d1a16]">{p.title}</div>
                                     {p.description && (
-                                      <div className="mt-0.5 text-[11px] text-[#51625d] leading-relaxed">
+                                      <p className="mt-0.5 text-[11px] text-[#5a6e68] leading-relaxed line-clamp-2">
                                         {p.description}
-                                      </div>
+                                      </p>
                                     )}
                                   </div>
                                 ))}
@@ -813,16 +783,18 @@ export default function CampusNetworkPage() {
                             )}
                           </div>
                         )}
+                      </div>
 
-                        {/* Availability & Social Links */}
-                        <div className="mt-3.5 pt-2.5 border-t border-[#f0f4f2] flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#51625d]">
-                          {mentor.availability && (
-                            <div className="flex items-center gap-1 text-[11px]">
-                              <span className="text-[#0f4a3c] font-semibold">🕒</span>
-                              <span className="truncate max-w-[170px]">{mentor.availability}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-2 font-medium ml-auto">
+                      {/* Footer: Availability & Action Buttons */}
+                      <div className="mt-4 pt-3 border-t border-[#f0f4f2]">
+                        {/* Micro info row: Availability status + clean links */}
+                        <div className="flex items-center justify-between text-[11px] text-[#627570] mb-3">
+                          <span className="flex items-center gap-1.5 truncate max-w-[170px]" title={mentor.availability || "Open for mentorship"}>
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                            <span className="truncate">{mentor.availability || "Open to connect"}</span>
+                          </span>
+
+                          <div className="flex items-center gap-2 shrink-0 font-medium">
                             {mentor.links?.linkedin && (
                               <a
                                 href={mentor.links.linkedin}
@@ -830,7 +802,7 @@ export default function CampusNetworkPage() {
                                 rel="noreferrer"
                                 className="text-[#0f4a3c] hover:underline"
                               >
-                                LinkedIn ↗
+                                LinkedIn
                               </a>
                             )}
                             {mentor.links?.github && (
@@ -840,7 +812,7 @@ export default function CampusNetworkPage() {
                                 rel="noreferrer"
                                 className="text-[#0f4a3c] hover:underline"
                               >
-                                GitHub ↗
+                                GitHub
                               </a>
                             )}
                             {mentor.links?.portfolio && (
@@ -850,56 +822,56 @@ export default function CampusNetworkPage() {
                                 rel="noreferrer"
                                 className="text-[#0f4a3c] hover:underline"
                               >
-                                Portfolio ↗
+                                Portfolio
                               </a>
                             )}
                           </div>
                         </div>
-                      </div>
 
-                      {/* Actions */}
-                      <div className="mt-4 pt-3 border-t border-[#e8eeec] flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setTargetMentorForQuestion(mentor);
-                            setQuestionConcept(initialConcept || "");
-                            setQuestionSuccess(null);
-                            setQuestionError(null);
-                          }}
-                          className="flex-1 py-2 px-2.5 rounded-xl bg-[#e5f0ec] hover:bg-[#d5e7e1] text-[#0f4a3c] text-xs font-semibold transition-all text-center cursor-pointer"
-                        >
-                          Ask Question
-                        </button>
-
-                        {mentor.connection_state === "accepted" ? (
-                          <Link
-                            href="/student/connections"
-                            className="flex-1 py-2 px-2.5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-semibold transition-all text-center cursor-pointer"
-                          >
-                            Chat on Skills →
-                          </Link>
-                        ) : mentor.connection_state === "pending" ? (
-                          <button
-                            disabled
-                            className="flex-1 py-2 px-2.5 rounded-xl bg-[#f4f7f6] text-[#71827d] text-xs font-semibold cursor-not-allowed"
-                          >
-                            Pending
-                          </button>
-                        ) : (
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2">
                           <button
                             type="button"
                             onClick={() => {
-                              setTargetMentorForConnection(mentor);
-                              setConnectionConcept(initialConcept || "");
-                              setConnectionSuccess(null);
-                              setConnectionError(null);
+                              setTargetMentorForQuestion(mentor);
+                              setQuestionConcept(initialConcept || "");
+                              setQuestionSuccess(null);
+                              setQuestionError(null);
                             }}
-                            className="flex-1 py-2 px-2.5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-semibold transition-all text-center shadow-xs cursor-pointer"
+                            className="flex-1 py-2 px-2.5 rounded-xl bg-[#f0f5f3] hover:bg-[#e2ede8] text-[#0f4a3c] text-xs font-semibold transition-all text-center cursor-pointer border border-[#d6e7df]"
                           >
-                            Request Mentorship
+                            Ask Question
                           </button>
-                        )}
+
+                          {mentor.connection_state === "accepted" ? (
+                            <Link
+                              href="/student/connections"
+                              className="flex-1 py-2 px-2.5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-semibold transition-all text-center cursor-pointer"
+                            >
+                              Chat on Skills →
+                            </Link>
+                          ) : mentor.connection_state === "pending" ? (
+                            <button
+                              disabled
+                              className="flex-1 py-2 px-2.5 rounded-xl bg-[#f4f7f6] text-[#71827d] text-xs font-semibold cursor-not-allowed"
+                            >
+                              Pending
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTargetMentorForConnection(mentor);
+                                setConnectionConcept(initialConcept || "");
+                                setConnectionSuccess(null);
+                                setConnectionError(null);
+                              }}
+                              className="flex-1 py-2 px-2.5 rounded-xl bg-[#0f4a3c] hover:bg-[#0b382d] text-white text-xs font-semibold transition-all text-center shadow-xs cursor-pointer"
+                            >
+                              Request Mentorship
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
